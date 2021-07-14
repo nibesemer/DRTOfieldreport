@@ -34,7 +34,7 @@ Sys.setenv(TZ = 'UTC')
 # dirList <- c("~/Documents/aACCRETE/instruments/aRecovery/20200113-strs-bisc-bnp-urb/urban")
 
 # list of directories (DRTO 2021)
-dirList <- c("~/Desktop/DRTO Data Entry/DRTO STRs")
+dirList <- c("/Users/LDutra/Documents/R/DRTOFieldreport/DRTOSTRs")
 
 globalMinDate <- globalMaxDate <- NULL
 globalMinTemp <- globalMaxTemp <- NULL
