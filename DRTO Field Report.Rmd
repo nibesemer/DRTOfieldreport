@@ -9,7 +9,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 library(tidyverse)
 library(lubridate)
 library(plotly)
@@ -52,15 +51,10 @@ Summary plots from all 4 Subsurface Temperature Recorders (STRs) collected at ou
 *Section figuing out mikes loop I am trying to figure out how to produce the plots
 
 ```{r mike STR code data set up, include=FALSE}
-
 #interesting but still trying to understand the nuances of how to get the plots to actaully show
-
-
 dirList <- c("/Users/LDutra/Documents/R/DRTOFieldreport/DRTOSTRs")
-
 globalMinDate <- globalMaxDate <- NULL
 globalMinTemp <- globalMaxTemp <- NULL
-
 # first loop: just determine global axes bounds
 for (thisDir in dirList) {
   fileList <- list.files(thisDir)
@@ -103,14 +97,12 @@ for (thisDir in dirList) {
     # print(paste(" glob:", globalMinDate, globalMaxDate, globalMinTemp, globalMaxTemp))
   }
 }
-
 # how big should the breaks in the x axis be?
 if ((globalMaxDate-globalMinDate) > 365.25) {
   xWidth <- "4 months"
 } else {
   xWidth <- "1 month"
 }
-
 # second loop: replot data
 for (thisDir in dirList) {
   fileList <- list.files(thisDir)
@@ -170,10 +162,8 @@ for (thisDir in dirList) {
 
 
 ```{r temperature - individual plot 1m, echo=FALSE,fig.width = 12,fig.height = 3}
-
 ##trying to see if i can still use mikes plot but he has a lot of created values. 
 #need to add titles
-
 str1 <- read_csv('./DRTOSTRs/DRTO_west_01m_sn7774_tag3094_pulaski-shoal_2018-07-11_2021-06-27_processed.csv',col_types = cols())
 ggplot(data = str1) +
       geom_line(aes(x = ymd_hms(UTCDateTime), y = Temperature), col = 'dodgerblue') +
@@ -206,7 +196,6 @@ ggplot(data = str1) +
  
 ```{r temperature - individual plot 5m, echo=FALSE,fig.width = 12,fig.height = 3}   
 str5 <- read_csv('./DRTOSTRs/DRTO_west_05m_sn8621_tag3093_white-shoal_2018-07-11_2021-06-26_processed.csv',col_types = cols())
-
 ggplot(data = str5) +
       geom_line(aes(x = ymd_hms(UTCDateTime), y = Temperature), col = 'dodgerblue') +
       theme_bw() +
@@ -230,7 +219,6 @@ ggplot(data = str5) +
     comb = ggarrange(plot, box, widths = c(6, 1))
     
     final = annotate_figure(comb, top = ) 
-
 ```
  
  
@@ -270,7 +258,6 @@ str15 <- read_csv('./DRTOSTRs/DRTO_west_15m_sn7769_tag3092_bird-key-reef_2018-07
 
 ```{r temperature - individual plot 25m, echo=FALSE,fig.width = 12,fig.height = 3} 
 str25 <- read_csv('./DRTOSTRs/DRTO_west_25m_sn7784_tag3091_black-coral-rock_2018-07-12_2020-02-07_processed.csv',col_types = cols())   
-
     ggplot(data = str25) +
       geom_line(aes(x = ymd_hms(UTCDateTime), y = Temperature), col = 'dodgerblue') +
       theme_bw() +
@@ -295,7 +282,6 @@ str25 <- read_csv('./DRTOSTRs/DRTO_west_25m_sn7784_tag3091_black-coral-rock_2018
     
     final = annotate_figure(comb, top = )      
     
-
 ```
     
 
@@ -308,16 +294,11 @@ Tiltmeters are used to collect data on current movement. The below data was coll
 
 
 ```{r tiltmeter data, echo=FALSE,fig.width = 12,fig.height = 3}
-
-
-
 fileAny <- "~/Desktop/DRTO Data Entry/2102061_DRTO-2021-06_(0)_Current.csv"
-
 # hardcoded limits for this DRTO file are
 # ymd_hms("2021/06/25 18:30:00") and ymd_hms("2021/06/28 19:45:00")
 # (future enhancement: incorporate Hannah Barkley's dataset trimming code;
 #  also, eliminate all the hardcoding below and calculate from data)
-
 dataAny <- read.csv(fileAny, header = TRUE)
 dataAny$date = ymd_hms(paste0(dataAny$Date, dataAny$Time), tz = "UTC")
 dataAny <- dataAny[, c("date","Speed..cm.s.","Heading..degrees.")]
@@ -325,10 +306,8 @@ colnames(dataAny) <- c("date","ws","wd")
 dataAny$dateEDT<-NA
 dataAny <- subset(dataAny, date >= ymd_hms("2021/06/25 18:30:00") & date <= ymd_hms("2021/06/28 19:45:00"))
 dataAny$dateEDT <- lubridate::with_tz(dataAny$date, "America/New_York")
-
 # 2021/07/09 working up more tiltmeter graphs completely in R
 # (not just openair's windRose plot, which was suggested by Ian originally)
-
 # line plot (Current Speed)
 ggplot(data = dataAny) +
   geom_line(aes(x = dateEDT, y = ws), col = 'dodgerblue') +
@@ -341,9 +320,6 @@ ggplot(data = dataAny) +
   ylab(expression(atop("Current Speed (cm/s)"))) +
   xlab(expression(atop("Date and Time (EDT)"))) +
   scale_y_continuous(expand=c(0,0),limits=c(0,12))
-
-
-
 ```
 
 
@@ -377,8 +353,6 @@ PAR %>%
   scale_x_datetime(date_breaks = "6 hour",
                    date_minor_breaks = "3 hour",
                    date_labels = "%H:%M")
-
-
 ```
 
 ### pH data
@@ -395,9 +369,6 @@ pH <- read_csv('./DRTO_SeaFET07062021.csv',col_types = cols()) %>%
    filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
          DateTime <= as.POSIXct('2021-06-28 19:45:00', tz='UTC')) %>%
   mutate(DateTime = with_tz(DateTime, 'America/New_York'))
-
-
-
 pH %>%
   ggplot(aes(x=DateTime, y=pH)) +
   geom_line(color = "red", size=1) + 
@@ -408,10 +379,8 @@ pH %>%
   scale_x_datetime(date_breaks = "6 hour",
                    date_minor_breaks = "3 hour",
                    date_labels = "%H:%M")
-
 #pH and temp combined -----
 pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
-
 ggplot(data = pH) +
   annotate("rect",
           xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:00:00', tz='EST'),
@@ -442,14 +411,14 @@ ggplot(data = pH) +
                     expand = T) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          plot.margin = unit(c(1,3,1,1), "lines"),
+          p
+lot.margin = unit(c(1,3,1,1), "lines"),
         legend.position = "bottom") +
   annotate("text",
           label = paste("Jun", 25:28),
           x = seq.POSIXt(as.POSIXct('2021-06-25 13:30:00', tz='EST'),
                          by = "day", length.out = 4),
           y = 7.985)
-
 ```
 
 
