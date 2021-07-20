@@ -2,36 +2,18 @@
 
 This repository contains data and analysis scripts from the Dry Tortugas NCRMP report:
 
-## TITLE
+## Climate Monitoring Brief: Dry Tortugas National Park
+
 #### Authors: Nicole Besemer, Ana Palacio and Ian Enochs
  
-
 -----
 
 ### Description:
-This work 
 
-* Goal 1
-* Goal 2
+The NOAA Atlantic Oceanographic and Metorolgical Laboratory condunts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the US atlantic and Caribbean Reef jurisdictions.This summer brief provides an overview of the most recent survey efforts.
 
-### Contents:
+* The most recent climate monitoring took place at Dry Tortugas National park from June 24th to June 29th 2021.
 
+* Data were collected at 4 different sites to collect and deploy instruments that monitor temperature, current, pH, light, bioerosion and calcification.
 
-#### 1.Temperature:
-* **XXX:** 
-
-#### 2.Mortality (all spp):
-* **XXX:** 
-
-#### 3.Growth (only *A.cer*):
-* **XXX:**
-
-
-#### 4.YII (all spp):
-* **XXX:** 
-
-#### 5.SH_Scm_Chla (all spp):
-* **XXX:** 
-
-</br>
-
+* At the Bird Key Reef site, landscape mosaics(n=6) and carbonate budget surveys(n=6) were completed to monitor changes in benthic cover and carbonate production.
