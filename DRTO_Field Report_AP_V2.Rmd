@@ -1,7 +1,9 @@
 ---
 output:
-  word_document: default
   html_document: default
+  word_document: default
+  always_allow_html: yes
+  pdf_document: default
 ---
 
 <h2 style="color: darkblue;font size=16"> Climate Monitoring Brief: Dry Tortugas National Park</h2> 
@@ -15,13 +17,8 @@ National Oceanic Atmospheric Administration</h4>
 <br>
 
 <h5 style="font size=6">
-Nicole Besemer <br>
-Ana Palacio <br> 
-Ian Enochs </h5>
-
-<br>
-
-July 2021
+N. Besemer, G. Kolodziej, M. Jankulak, A. Palacio, I. Enochs - July 2021
+</h5>
 
 <p float="left">
    <img src="Logos/AOML.jpg" width="100" />
@@ -31,7 +28,10 @@ July 2021
  </p>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, warning = FALSE, 
+               fig.align = "center")
+options(htmltools.dir.version = FALSE)
 ```
 
 ```{r libraries, include=FALSE}
@@ -45,12 +45,21 @@ library(scales)
 library(openair)
 library(magick)
 library(ggplot2)
-```
+library(knitr)
+# Map
+library(leaflet)
 
+# Dynamic html to static
+#install.packages("webshot")
+library(webshot)
+#webshot::install_phantomjs()
+#library(PhantomJS)
+```
 
 ### About this summary brief
 
 The NOAA Atlantic Oceanographic and Metorolgical Laboratory condunts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the US atlantic and Caribbean Reef jurisdictions.This summer brief provides an overview of the most recent survey efforts.
+
 
 ### Sampling effort
 
@@ -60,11 +69,13 @@ The NOAA Atlantic Oceanographic and Metorolgical Laboratory condunts the long-te
 
 
 ### Spatial sample design
+
 Survey site locations were selected to represent temporal‐resolution monitoring with moored instruments at fixed time‐series. These sites were placed on depth gradient to see how virtical structure affects reef status and trends. Pulaski Shoal (1m), 
 
-### Sampling methods
-Subsurface Temperature Recorder(STR)s are placed at at all 4 sites and collect temperature measurments for at 5 minute intervals for 3 years. Bird Key Reef was selected as the Class 2 sampling site where additional instruments are deployed for a 72 hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collect measurments at 5 minute intervals. Subsurface Automatic Samplers (SAS) collect discrete water samples at three hour intervals (n=24).
 
+### Sampling methods
+
+Subsurface Temperature Recorder(STR)s are placed at at all 4 sites and collect temperature measurments for at 5 minute intervals for 3 years. Bird Key Reef was selected as the Class 2 sampling site where additional instruments are deployed for a 72 hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collect measurments at 5 minute intervals. Subsurface Automatic Samplers (SAS) collect discrete water samples at three hour intervals (n=24).
 
 
 ### Overview of data collected
@@ -73,12 +84,55 @@ temporary map - working on something else
 
 ![Map of Study locations in Dry Tortugas National Park](Data/DRTO_NCRMPClimate_2021.jpg)
 
+This is a map made with R. Match colors if we used one panel for temperature
 
-------
+```{r mapInfo, include=FALSE}
+# Map information
+# Add info from the sampling stations
+stations <- read.csv(textConnection("
+  Site,	Lat,	Long,	Depth
+  Pulaski shoal,	24.693342,	-82.773034,	1m
+  White Shoal,	24.641420,	-82.896200,	5m
+  Bird Key Reef,	24.611310,	-82.870500,	15m
+  Black Coral Rock,	24.699300,	-83.00218,	25m"))
 
+kable(head(stations, format = "html"))
+
+#Change color depending on type of data?
+  #stations$Site<-as.numeric(stations$Site)
+  # pal <- colorNumeric(palette = "YlOrRd", 
+                      #domain = stations$Site)
+  
+  #stations$Site<-as.factor(stations$Site)
+  pal.gen <- colorFactor(palette = "Set1",
+                         domain = stations$Site)
+```
+
+
+```{r makeAmap, echo=FALSE}
+leaflet(stations, height = '400px') %>% 
+  addTiles() %>%
+  addProviderTiles(providers$Esri.WorldImagery)%>%
+  #addProviderTiles(providers$CartoDB.Positron) %>% 
+  #addMarkers(icon=coral.icon) %>% 
+  addCircleMarkers(lng = ~Long, lat = ~Lat, 
+                   stroke = FALSE, radius = 6, 
+                   fillOpacity = 1,
+                   color = ~pal.gen(Site),
+                   label = ~Depth,
+                   labelOptions = labelOptions(
+                     noHide = T, direction = "bottom",
+                     textOnly = TRUE,
+                     style = list(
+        "color" = "white")))  %>%
+  addLegend(position = "topright",
+            pal = pal.gen, 
+            values = ~Site, opacity = 1) %>%
+  fitBounds(lng1=-83.01, lat=24.7, lng2=-82.76, lat2=24.6)
+  
+```
 
 #### Temperature Data
-
 
 ```{r get Temp, include=FALSE}
 
@@ -213,12 +267,9 @@ Figure1b
 
 <font size="2"> **Figure 1:** Temperature data collected for 3 years at four sites in the Dry Tortugas at 1 m (Pulaski Shoal Lighthouse), 5m (white-shoal), 15m (Bird Key Reef) and 25 m (Black Coral Rock).The 1m, 5m, and 15m collected data for the full deployment. The 25m STR stopped collecting on Febuary 7th 2020. </font>
  
- 
 -----
 
 #### Diurnal Suite Deployment
-
-
 
 ```{r diurnal suite data, include = FALSE}
 
@@ -258,7 +309,6 @@ pH <- read_csv('Data/DRTO_SeaFET07062021.csv',col_types = cols()) %>%
   names(joinedPhTilt)[4]<-'UTCdateTime'
 
 ```
-
 
 ```{r tilt ph temp stacked,echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 11}
 
@@ -321,25 +371,7 @@ figure2
 
 ```
 
-
 <font size="2"> **Figure 2:**  Summary plots of pH, Temperature and current speed collected from instrument deployment at Bird Key Reef site around 45 feet from June 25th to June 28th. Instruments measured parameters ever 5 minutes. </font>
-
------
-
-#### Current Data
-
-
-```{r tiltmeter rosePlot, echo=FALSE,fig.width = 6.5, fig.height = 6.5}
-
-rosePlot = windRose(current, ws = "ws", wd = "wd", ws.int=2, cols = brewer_pal(palette="Spectral", direction=-1)(6), breaks=6, paddle=FALSE, key.header="(cm/s)", key.footer="NCRMP - DRTO")
-
-```
-
-<font size="2"> **Figure 3:**  Measurements of current direction from the tiltmeter collected every 5 minutes.  </font>
-
-
-
------
 
 
 #### Light Data
@@ -379,7 +411,23 @@ PAR %>%
 
 ```
 
-<font size="2"> **Figure 4:**  EcoPar light intensity data collected in PAR from the 72 hour deployment at Bird Key Reef </font>
+<font size="2"> **Figure 3:**  EcoPar light intensity data collected in PAR from the 72 hour deployment at Bird Key Reef </font>
+
+
+-----
+
+#### Current Data
+
+
+```{r tiltmeter rosePlot, echo=FALSE,fig.width = 6.5, fig.height = 6.5}
+
+rosePlot = windRose(current, ws = "ws", wd = "wd", ws.int=2, cols = brewer_pal(palette="Spectral", direction=-1)(6), breaks=6, paddle=FALSE, key.header="(cm/s)", key.footer="NCRMP - DRTO")
+
+```
+
+<font size="2"> **Figure 4:**  Measurements of current direction from the tiltmeter collected every 5 minutes.  </font>
+
+-----
 
 ### About the monitoring program
 
@@ -389,6 +437,7 @@ CRCP monitoring efforts aim to:
 * Document the status of reef species of ecologicaland economic importance.
 * Track and assess changes in reef communities inresponse to environmental stressors or humanactivities.
 * Evaluate the effectiveness of specific managementstrategies and identify actions for future andadaptive responses.
+
 
 ### For more information
 
