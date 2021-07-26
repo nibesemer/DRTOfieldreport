@@ -58,31 +58,28 @@ library(webshot)
 
 ### About this summary brief
 
-The NOAA Atlantic Oceanographic and Metorolgical Laboratory condunts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the US atlantic and Caribbean Reef jurisdictions.This summer brief provides an overview of the most recent survey efforts.
+The NOAA Atlantic Oceanographic and Meteorolgical Laboratory (AOML) conducts the long-term [National Coral Reef Monitoring Program (NCRMP)](https://www.coris.noaa.gov/monitoring/welcome.html) to track the status and trends of coral reef ecosystems of the U.S. Atlantic and Caribbean coral reef jurisdictions. This FY21 summery brief provides an overview of the most recent survey efforts.
 
 
 ### Sampling effort
 
-* The most recent climate monitoring took place at Dry Tortugas National park from June 24th to June 29th 2021
+* The most recent NCRMP Atlantic climate monitoring took place at Dry Tortugas National Park from June 24th to June 29th 2021
 * Data were collected at 4 different sites to collect and deploy instruments that monitor temperature, current, pH, light, bioerosion and calcification
 * At the Bird Key Reef site, landscape mosaics(n=6) and carbonate budget surveys(n=6) were completed to monitor changes in benthic cover and carbonate production
 
 
 ### Spatial sample design
 
-Survey site locations were selected to represent temporal‐resolution monitoring with moored instruments at fixed time‐series. These sites were placed on depth gradient to see how virtical structure affects reef status and trends. Pulaski Shoal (1m), 
+Survey site locations were selected to represent temporal‐resolution monitoring with moored instruments at fixed time‐series. These sites were placed on depth gradient to see how vertical structure affects reef status and trends. Pulaski Shoal (1m), White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m) are the selected study sites.
 
 
 ### Sampling methods
 
-Subsurface Temperature Recorder(STR)s are placed at at all 4 sites and collect temperature measurments for at 5 minute intervals for 3 years. Bird Key Reef was selected as the Class 2 sampling site where additional instruments are deployed for a 72 hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collect measurments at 5 minute intervals. Subsurface Automatic Samplers (SAS) collect discrete water samples at three hour intervals (n=24).
+Subsurface Temperature Recorder (STR)s were placed at all 4 sites and collected temperature measurements at 5 minute intervals for 3 years. Bird Key Reef was selected as the sampling site where additional instruments were deployed for a 72-hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collected measurements at 5-minute intervals. Subsurface Automatic Samplers (SAS) collected discrete water samples at three-hour intervals (n=24).
 
 
 ### Overview of data collected
 
-temporary map - working on something else
-
-![Map of Study locations in Dry Tortugas National Park](Data/DRTO_NCRMPClimate_2021.jpg)
 
 This is a map made with R. Match colors if we used one panel for temperature
 
@@ -131,6 +128,9 @@ leaflet(stations, height = '400px') %>%
   fitBounds(lng1=-83.01, lat=24.7, lng2=-82.76, lat2=24.6)
   
 ```
+
+Map of study sites in Dry Tortugas National Park area
+
 
 #### Temperature Data
 
@@ -224,48 +224,7 @@ Figure1 <- ggarrange(plot, box, widths = c(8, 2))
 Figure1    
 ```
 
-Plot 1 option 2
-
-```{r plot temperature option 2, echo=FALSE,fig.width =8.5,fig.height = 11}
-
-# facet the data (opcion 2)
-
-plot<-ggplot(data = str_all) +
-      geom_line(aes(x = ymd_hms(UTCDateTime), 
-                    y = Temperature), 
-                colour="dodgerblue") +
-  
-  theme_bw() +
-  theme(axis.title.x = element_blank(),
-        legend.position = c(0.5, 0.05) ,
-        legend.direction = "horizontal" ,
-        plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-      
-  scale_x_datetime(breaks = breaks_width(xWidth),
-                       labels = date_format("%m/%Y"),
-                       limits = c(globalMinDate, globalMaxDate)) +
-  scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp)) +
-      ylab(expression(atop(
-        paste("Temperature (", degree, "C)")
-      ))) +
-  facet_grid(Depth~.)
-      
-    
-box <- ggplot(data = str_all) +
-      geom_boxplot(aes(x = "", y = Temperature), fill='dodgerblue') +
-      theme_bw() +
-      theme(axis.title.x = element_blank(),
-            axis.title.y = element_blank(),
-            legend.position = "none")+
-      scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp))+
-  facet_grid(Depth~.)
-    
-Figure1b <- ggarrange(plot, box, widths = c(8, 2))
-Figure1b   
-
-```
-
-<font size="2"> **Figure 1:** Temperature data collected for 3 years at four sites in the Dry Tortugas at 1 m (Pulaski Shoal Lighthouse), 5m (white-shoal), 15m (Bird Key Reef) and 25 m (Black Coral Rock).The 1m, 5m, and 15m collected data for the full deployment. The 25m STR stopped collecting on Febuary 7th 2020. </font>
+<font size="2"> **Figure 1:** Temperature data collected for 3 years at four sites in the Dry Tortugas at 1 m (Pulaski Shoal Lighthouse), 5m (White Shoal), 15m (Bird Key Reef) and 25 m (Black Coral Rock).The 1m, 5m, and 15m collected data for the full deployment. The 25m STR stopped collecting on Febuary 7th 2020. </font>
  
 -----
 
@@ -307,13 +266,32 @@ pH <- read_csv('Data/DRTO_SeaFET07062021.csv',col_types = cols()) %>%
 # 3.join current and pH 
   joinedPhTilt<-merge(pH,current, by.x="DateTime", by.y = "DateTime")
   names(joinedPhTilt)[4]<-'UTCdateTime'
+  
+  
+# 4. Get the PAR data  
+  light <- read_csv('Data/DRTO_EcoPAR07062021.csv',col_types = cols()) %>%
+          mutate(DateTime = mdy_hms(paste(Date, Time))) %>%
+          select(DateTime, `PAR (CALC)`) %>%
+          drop_na() %>%
+          mutate(interval = 0:(nrow(.)-1) %/% 10) %>%
+          group_by(interval) %>%
+          summarise(DateTime = mean(DateTime),
+                    PAR = mean(`PAR (CALC)`),
+                    sd = sd(`PAR (CALC)`)) %>%
+        select(-interval) %>%
+
+  #manual start/stop time of monitoring
+  filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
+         DateTime <= as.POSIXct('2021-06-28 19:45:00', tz='UTC')) %>%
+  mutate(DateTime = with_tz(DateTime, 'America/New_York'))
 
 ```
 
-Option 1, 3 plots
 
-```{r tilt ph temp stacked,echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 11}
 
+
+
+```{r,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 14, eval= FALSE}
 # line plot (Current Speed)
 currentline<-ggplot(data = joinedPhTilt) +
   geom_line(aes(x = DateTime, y = ws), col = 'dodgerblue') +
@@ -368,61 +346,8 @@ templine<-ggplot(data = joinedPhTilt) +
   scale_y_continuous(expand=c(0,0),limits=c(28.0,28.8))
 
 
-figure2<-ggarrange(phline, templine, currentline, ncol=1)
-figure2
-
-```
-
-<font size="2"> **Figure 2:**  Summary plots of pH, Temperature and current speed collected from instrument deployment at Bird Key Reef site around 45 feet from June 25th to June 28th. Instruments measured parameters ever 5 minutes. </font>
-
-
-
-
-#### Light Data
-
-
-```{r ecopar data, warning= FALSE, echo = FALSE}
-
-PAR <- read_csv('Data/DRTO_EcoPAR07062021.csv',col_types = cols()) %>%
-          mutate(DateTime = mdy_hms(paste(Date, Time))) %>%
-          select(DateTime, `PAR (CALC)`) %>%
-          drop_na() %>%
-          mutate(interval = 0:(nrow(.)-1) %/% 10) %>%
-          group_by(interval) %>%
-          summarise(DateTime = mean(DateTime),
-                    PAR = mean(`PAR (CALC)`),
-                    sd = sd(`PAR (CALC)`)) %>%
-        select(-interval) %>%
-
-  #manual start/stop time of monitoring
-  filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
-         DateTime <= as.POSIXct('2021-06-28 19:45:00', tz='UTC')) %>%
-  mutate(DateTime = with_tz(DateTime, 'America/New_York'))
-```
-
-
-```{r ecopar plot, echo=FALSE, warning= FALSE, fig.width = 12,fig.height = 3.5}
-
-PAR %>%
-  ggplot(aes(x=DateTime, y=PAR)) +
-  geom_line(color = "aquamarine4", size=1) + 
-  theme_bw() +
-  labs(y = expression(paste("PAR (",mu,"mol photons m"^-2,"s"^-1,")")),
-       x = "Time of Day (EDT)") +
-  scale_x_datetime(date_breaks = "6 hour",
-                   date_minor_breaks = "3 hour",
-                   date_labels = "%H:%M")
-
-```
-
-<font size="2"> **Figure 3:**  EcoPar light intensity data collected in PAR from the 72 hour deployment at Bird Key Reef </font>
-
-
-Option 2: 4 plots
-
-
-```{r,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 14}
-PARline<-ggplot(data = PAR) +
+# line plot (PAR)
+PARline<-ggplot(data = light) +
   geom_line(aes(x = DateTime, y = PAR), col = 'aquamarine4') +
   theme_bw() +
   theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
@@ -438,42 +363,200 @@ PARline<-ggplot(data = PAR) +
   xlab(expression(atop("Date and Time (EDT)"))) 
 
 
-figure2b<-ggarrange(phline, templine, currentline, PARline, ncol=1)
-figure2b
+figure2a<-ggarrange(phline, templine, currentline, PARline, ncol=1)
+figure2a
 ```
 
-<font size="2"> **Figure 2b:**  Summary plots of pH, Temperature, current speed and PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Instruments measured parameters every 5 minutes. </font>
+option 1
+
+```{r,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 7}
+
+#ph and temp
+
+pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
+
+
+phtempplot<- ggplot() +
+  geom_line(data = pH, aes(x=DateTime, y=pH),color = "dark orange", size=1) +
+  geom_line(data = pH, aes(x=DateTime, y=Temp.adj), color = "coral1", size=1, alpha = 0.5) +
+  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
+  scale_x_datetime(breaks = date_breaks("8 hours"),
+                  labels = date_format("%m/%d\n%H:%M",
+                                        tz="America/New_York"),
+                   limits = c(ymd_hms("2021/06/25 16:00:00",
+                                         tz="America/New_York"),
+                             ymd_hms("2021/06/28 16:00:00",
+                             tz="America/New_York")),
+                   expand=c(0,0)) +
+  ylab(expression(atop(paste("pH")))) +
+  xlab(expression(atop("Date and Time (EDT)"))) +
+  scale_y_continuous(limits = c(7.925,7.985), n.breaks = 5, sec.axis = sec_axis(~(.-4.8371)/0.1099, name="Temperature (\u00B0C)")) 
+
+
+
+##light and current
+scaleFactor2 <- max(light$PAR) / max(current$ws)
+current$ws.adj<-(current$ws * scaleFactor2)
+colors <- c("PAR" = "aquamarine4", "ws.adj" = "dodgerblue")
+
+
+parcurrentplot<- ggplot() +
+  geom_line(data = light, aes(x=DateTime, y=PAR),color = "aquamarine4", size=1) +
+  geom_line(data = current, aes(x=date, y=ws.adj),
+            color = "dodgerblue", size=1, alpha = 0.5) +
+  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
+  scale_x_datetime(breaks = date_breaks("8 hours"),
+                  labels = date_format("%m/%d\n%H:%M",
+                                        tz="America/New_York"),
+                   limits = c(ymd_hms("2021/06/25 16:00:00",
+                                         tz="America/New_York"),
+                             ymd_hms("2021/06/28 16:00:00",
+                             tz="America/New_York")),
+                   expand=c(0,0)) +
+  ylab(expression(atop(paste("PAR (",mu,"mol photons m"^-2,"s"^-1,")")))) +
+  xlab(expression(atop("Date and Time (EDT)"))) +
+  scale_y_continuous(limits = c(0,500), sec.axis = sec_axis(~./scaleFactor2, name="Current Speed (cm/s)", breaks = seq(0,12,2)))
+
+
+figure2b<-ggarrange(phtempplot, parcurrentplot, ncol=1)
+figure2b
+
+```
+
+
+<font size="2"> **Figure 2:**  Summary plots of pH paired with Temperature, and  current speed paired with PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Instruments measured parameters every 5 minutes. </font>
+
+
+
+
+option 2:
+
+
+```{r ph and temp combined,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 6}
+#pH and temp combined -----
+pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
+
+ggplot(data = pH) +
+  annotate("rect",
+          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:00:00', tz='EST'),
+                         by = "day", length.out = 3),
+          xmax = seq.POSIXt(as.POSIXct('2021-06-26 08:00:00', tz='EST'),
+                         by = "day", length.out = 3),
+          ymin = -Inf, ymax = Inf,
+          fill="grey", alpha=0.5) +
+  geom_line(aes(x=DateTime, y=pH, color = "pH"),
+            size=1) +
+  geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
+            size=0.7, alpha = 0.5) +
+  labs(y = "pH",
+       x = "Date and Time (EDT)") +
+  scale_y_continuous(limits = c(7.925,7.985), sec.axis = sec_axis(~(.-4.8371)/0.1099)) +
+  scale_x_datetime(date_breaks = "6 hour",
+                   date_minor_breaks = "3 hour",
+                   date_labels = "%m/%d\n%H:%M") +
+  annotate("text",
+           label = expression(paste("Temperature (",degree,"C)")),
+           angle=90,
+           x = max(pH$DateTime+(3600*10)),
+           y = 7.95) + 
+  coord_cartesian(ylim = c(7.925,7.985),
+                    xlim = c(min(pH$DateTime),max(pH$DateTime)),
+                    clip = 'off',
+                    expand = T) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+          plot.margin = unit(c(1,3,1,1), "lines"),
+        legend.position = "bottom") +
+  annotate("text",
+          label = paste("Jun", 25:28),
+          x = seq.POSIXt(as.POSIXct('2021-06-25 13:30:00', tz='EST'),
+                         by = "day", length.out = 4),
+          y = 7.985)+ 
+  scale_color_manual(values=c("darkorange", "coral1"))
+
+```
+
+```{r light and current compbined,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 6}
+
+
+scaleFactor <- max(light$PAR) / max(current$ws)
+current$ws.adj<-(current$ws * scaleFactor)
+
+
+ggplot(data = light) +
+  annotate("rect",
+          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:00:00', tz='EST'),
+                         by = "day", length.out = 3),
+          xmax = seq.POSIXt(as.POSIXct('2021-06-26 08:00:00', tz='EST'),
+                         by = "day", length.out = 3),
+          ymin = -Inf, ymax = Inf,
+          fill="grey", alpha=0.5) +
+  geom_line(aes(x=DateTime, y=PAR, color = "PAR"),
+            size=1) +
+  geom_line(data= current, aes(x=date, y=ws.adj, color = "Current Speed"),
+            size=0.7, alpha = 0.5) +
+  labs(y = "PAR",
+       x = "Date and Time (EDT)") +
+  scale_y_continuous(limits = c(0,455), sec.axis = sec_axis(~./scaleFactor, name="Current Speed (cm/s)", breaks = seq(1,12,2)))+
+  scale_x_datetime(date_breaks = "6 hour",
+                   date_minor_breaks = "3 hour",
+                   date_labels = "%m/%d\n%H:%M") +
+
+  coord_cartesian(ylim = c(0,455),
+                    xlim = c(min(light$DateTime),max(light$DateTime)),
+                    clip = 'off',
+                    expand = T) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+          plot.margin = unit(c(1,3,1,1), "lines"),
+        legend.position = "bottom") +
+  annotate("text",
+          label = paste("Jun", 25:28),
+          x = seq.POSIXt(as.POSIXct('2021-06-25 13:30:00', tz='EST'),
+                         by = "day", length.out = 4),
+          y = 450)+ 
+  scale_color_manual(values=c("dodgerblue", "aquamarine4"))
+
+
+```
+
+
+
+
+<font size="2"> **Figure 2:**  Summary plots of pH paired with Temperature, and  current speed paired with PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Instruments measured parameters every 5 minutes. </font>
 
 -----
 
-#### Current Data
+### Summary table
 
-
-```{r tiltmeter rosePlot, echo=FALSE,fig.width = 6.5, fig.height = 6.5}
-
-rosePlot = windRose(current, ws = "ws", wd = "wd", ws.int=2, cols = brewer_pal(palette="Spectral", direction=-1)(6), breaks=6, paddle=FALSE, key.header="(cm/s)", key.footer="NCRMP - DRTO")
-
-```
-
-<font size="2"> **Figure 4:**  Measurements of current direction from the tiltmeter collected every 5 minutes.  </font>
+Temperature records: 1.1 million points, 700 days, 4 depths
+pH measurements: 
+Light measurements:
+Current measurements:
 
 -----
 
 ### About the monitoring program
 
-The Atlantic climate monitoring forms a key part of the National Coral Reef Monitoring Program of NOAA's Coral Reef Conservation Program (CRCP), providing integrated, consistement and comparable data across U.S. Managed coral reef ecosystems.
+AOML's climate monitoring is a key part of the National Coral Reef Monitoring Program of NOAA's Coral Reef Conservation Program (CRCP), providing integrated, consistent, and comparable data across U.S. Managed coral reef ecosystems.
 CRCP monitoring efforts aim to:
 
-* Document the status of reef species of ecologicaland economic importance.
-* Track and assess changes in reef communities inresponse to environmental stressors or humanactivities.
-* Evaluate the effectiveness of specific managementstrategies and identify actions for future andadaptive responses.
+* Document the status of reef species of ecological and economic importance.
+* Track and assess changes in reef communities in response to environmental stressors or human activities.
+* Evaluate the effectiveness of specific management strategies and identify actions for future and adaptive responses.
+
+![New STR depolyed at White Shoal in Dry Tortugas National Park](Data/STRfish.jpg)
 
 
 ### For more information
 
 Coral Reef Conservation Program: http://coralreef.noaa.gov
 
+NCRMP climate page: https://www.coris.noaa.gov/monitoring/climate.html
+
 NOAA Atlantic Oceanographic and Meteorological Laboratory:
 http://www.aoml.noaa.gov/
 
 Atlantic Climate team lead: nicole.besemer@noaa.gov
+
+NCRMP Coordinator: erica.towle@noaa.gov
