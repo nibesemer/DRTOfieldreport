@@ -1,30 +1,31 @@
 ---
 output:
-  word_document: default
   html_document: default
-  always_allow_html: yes
+  word_document: default
+  always_allow_html: true
   pdf_document: default
 ---
 
-<h2 style="color: darkblue;font size=16"> Climate Monitoring Brief: Dry Tortugas National Park</h2> 
+<h2 style="color: darkblue;font size=24"> National Coral Reef Monitoring Program</h2> 
+<h2 style="color: darkblue;font size=12"> Climate Monitoring Brief: Dry Tortugas National Park</h2>
 --------
+![New Subsurface Temperature Recorder depolyed at White Shoal in Dry Tortugas National Park](Data/STRfish.jpg){width=75%}
 <br>
 
 <h4 style="font size=8">
-Atlantic Oceanographic &amp; Meteorological Laboratory <br>
+Atlantic Oceanographic &amp; Meteorological Laboratory Coral Program<br>
+University of Miami Cooperative Institute of Marine and Atmospheric Science<br>
 National Oceanic Atmospheric Administration</h4>
 
 <br>
 
 <h5 style="font size=6">
-N. Besemer, G. Kolodziej, M. Jankulak, A. Palacio, I. Enochs - July 2021
+N. Besemer, A. Palacio, M. Jankulak, G. Kolodziej, I. Enochs - July 2021
 </h5>
 
 <p float="left">
    <img src="Logos/AOML.jpg" width="100" />
    <img src="Logos/CIMAS.png" width="100" />
-   <img src="Logos/CRCP.jpeg" width="100" />
-   <img src="Logos/OAP.png" width="100" />
  </p>
 
 ```{r setup, include=FALSE}
@@ -58,28 +59,20 @@ library(webshot)
 
 ### About this summary brief
 
-The NOAA Atlantic Oceanographic and Meteorolgical Laboratory (AOML) conducts the long-term [National Coral Reef Monitoring Program (NCRMP)](https://www.coris.noaa.gov/monitoring/welcome.html) to track the status and trends of coral reef ecosystems of the U.S. Atlantic and Caribbean coral reef jurisdictions. This FY21 summary brief provides an overview of the most recent survey efforts.
+The NOAA Atlantic Oceanographic and Meteorolgical Laboratory (AOML) conducts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the U.S. Atlantic and Caribbean coral reef jurisdictions. This FY21 summary brief provides an overview of the most recent survey efforts.
 
 
-### Sampling effort
+### Expedition summary
 
 * The most recent NCRMP Atlantic climate monitoring took place at Dry Tortugas National Park from June 24th to June 29th 2021
-* Four different sites were monitored by collecting and deploying instruments that monitor temperature, current, pH, light, bioerosion and calcification
-* At the Bird Key Reef site, landscape mosaics (n=6) and carbonate budget surveys (n=6) were completed to monitor changes in benthic cover and carbonate production
+* Four different sites were visited by 5 team members completing a total of 63 dives
+* Subsurface temperature recorders were recovered at all 4 study sites.
+* At the Bird Key Reef, short term instruments were deployed that monitor current, pH, light, bioerosion and calcification. landscape mosaics (n=6) and carbonate budget surveys (n=6) were completed to monitor changes in benthic cover and carbonate production, Bioerosion Monitoring Units (n=5)  and Calcification Accretions Units (n=5) were collected and swaped.
 
 
 ### Spatial sample design
 
 Survey site locations were selected to represent temporal‐resolution monitoring with moored instruments at fixed time‐series. These sites were placed on depth gradient to assess how vertical structure affects reef status and trends. Pulaski Shoal (1m), White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m) are the selected study sites.
-
-
-### Sampling methods
-
-Subsurface Temperature Recorder (STR)s were placed at all 4 sites and collected temperature measurements at 5-minute intervals for 3 years. At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collected measurements at 5-minute intervals. Subsurface Automatic Samplers (SAS) collected discrete water samples at three-hour intervals (n=24).
-
-
-### Overview of data collected
-
 
 ```{r mapInfo, include=FALSE}
 # Map information
@@ -126,11 +119,13 @@ leaflet(stations, height = '400px') %>%
   fitBounds(lng1=-83.01, lat=24.7, lng2=-82.76, lat2=24.6)
   
 ```
-
-Map of study sites in Dry Tortugas National Park area
-
+<font size="2"> **Figure 1:** Map of study sites in Dry Tortugas National Park area </font>
 
 #### Temperature Data
+
+Subsurface Temperature Recorder (STR)s made by SeaBird Electronics were placed at all 4 sites and collected temperature measurements at 5-minute intervals for 3 years.
+
+
 
 ```{r get Temp, include=FALSE}
 
@@ -154,13 +149,13 @@ Map of study sites in Dry Tortugas National Park area
   #head(str15)
   
   # 20m data
-  str20 <- read_csv('Data/DRTOSTRs/DRTO_west_25m_sn7784_tag3091_black-coral-rock_2018-07-12_2020-02-07_processed.csv',col_types = cols())
-  str20$Depth<-"20m"
-  head(str20)
+  str25 <- read_csv('Data/DRTOSTRs/DRTO_west_25m_sn7784_tag3091_black-coral-rock_2018-07-12_2020-02-07_processed.csv',col_types = cols())
+  str25$Depth<-"25m"
+  head(str25)
 
 # 2. Bind all data and order depth  
-  str_all<-rbind(str01, str05, str15, str20)
-  str_all$Depth<-factor(str_all$Depth, levels = c("1m", "5m", "15m", "20m"))
+  str_all<-rbind(str01, str05, str15, str25)
+  str_all$Depth<-factor(str_all$Depth, levels = c("1m", "5m", "15m", "25m"))
 
 ```
 
@@ -186,7 +181,7 @@ Plot option 1:
 
 # This is one option using colors to plot all temp data in the same plot (easy to see differences). If that is too much we can facet the data (opcion 2)
 
-depth_color<-c("cornflowerblue", "seagreen", "goldenrod1", "tomato3")
+depth_color<-c("lightskyblue1", "skyblue2", "deepskyblue3", "navyblue")
 
 plot<-ggplot(data = str_all) +
       geom_line(aes(x = ymd_hms(UTCDateTime), 
@@ -218,15 +213,18 @@ box <- ggplot(data = str_all) +
       scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp))+
   scale_fill_manual(values=depth_color)
     
-Figure1 <- ggarrange(plot, box, widths = c(8, 2))
-Figure1    
+Figure2 <- ggarrange(plot, box, widths = c(8, 2))
+Figure2    
 ```
 
-<font size="2"> **Figure 1:** Temperature data collected for 3 years at four sites in the Dry Tortugas at 1 m (Pulaski Shoal Lighthouse), 5m (White Shoal), 15m (Bird Key Reef) and 25 m (Black Coral Rock).The 1m, 5m, and 15m collected data for the full deployment. The 25m STR stopped collecting on Febuary 7th 2020. </font>
+<font size="2"> **Figure 2:** Temperature data collected for 3 years at four sites in the Dry Tortugas at 1 m (Pulaski Shoal Lighthouse), 5m (White Shoal), 15m (Bird Key Reef) and 25 m (Black Coral Rock).The 1m, 5m, and 15m collected data for the full deployment. The 25m STR stopped collecting on Febuary 7th 2020. </font>
  
 -----
 
 #### Diurnal Suite Deployment
+
+At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collected measurements at 5-minute intervals. Subsurface Automatic Samplers (SAS) collected discrete water samples at three-hour intervals (n=24).
+
 
 ```{r diurnal suite data, include = FALSE}
 
@@ -287,7 +285,7 @@ pH <- read_csv('Data/DRTO_SeaFET07062021.csv',col_types = cols()) %>%
 
 
 
-```{r,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 14, eval= FALSE}
+```{r ph temp current light,echo=FALSE, warning=FALSE,include=FALSE, fig.width = 12,fig.height = 14, eval= FALSE}
 # line plot (Current Speed)
 currentline<-ggplot(data = joinedPhTilt) +
   geom_line(aes(x = DateTime, y = ws), col = 'dodgerblue') +
@@ -359,13 +357,13 @@ PARline<-ggplot(data = light) +
   xlab(expression(atop("Date and Time (EDT)"))) 
 
 
-figure2a<-ggarrange(phline, templine, currentline, PARline, ncol=1)
-figure2a
+figure3a<-ggarrange(phline, templine, currentline, PARline, ncol=1)
+figure3a
 ```
 
-option 1
 
-```{r,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 7}
+
+```{r ph and temp combined v2,echo=FALSE, warning=FALSE, include=FALSE, fig.width = 12,fig.height = 7}
 
 #ph and temp
 
@@ -373,7 +371,7 @@ pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
 
 phtempplot<- ggplot(data = pH) +
   geom_line(aes(x=DateTime, y=pH),
-            color = "dark orange", size=1) +
+            color = "black", size=1) +
   geom_line(aes(x=DateTime, y=Temp.adj),
             color = "coral1", size=1, alpha = 0.5) +
   
@@ -391,7 +389,6 @@ phtempplot<- ggplot(data = pH) +
   ylab(expression(atop(paste("pH")))) +
   xlab(expression(atop("Date and Time (EDT)"))) +
   scale_y_continuous(limits = c(7.925,7.985),
-                     #n.breaks = 5, 
                      sec.axis = sec_axis(~(.-4.8371)/0.1099, name="Temperature (\u00B0C)")) 
 
 
@@ -426,45 +423,36 @@ parcurrentplot<- ggplot() +
                     breaks = seq(0,12,2)))
 
 
-figure2b<-ggarrange(phtempplot, parcurrentplot, ncol=1)
-figure2b
+figure3b<-ggarrange(phtempplot, parcurrentplot, ncol=1)
+figure3b
 
 ```
 
 
-<font size="2"> **Figure 2:**  Summary plots of pH paired with Temperature, and  current speed paired with PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Instruments measured parameters every 5 minutes. </font>
 
-
-option 2:
-
-
-```{r ph and temp combined,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 6}
+```{r ph and temp combined v3,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 6}
 #pH and temp combined -----
 pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
 
 ggplot(data = pH) +
   annotate("rect",
-          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:00:00', tz='EST'),
+          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
                          by = "day", length.out = 3),
-          xmax = seq.POSIXt(as.POSIXct('2021-06-26 08:00:00', tz='EST'),
+          xmax = seq.POSIXt(as.POSIXct('2021-06-26 05:45:00', tz='EST'),
                          by = "day", length.out = 3),
           ymin = -Inf, ymax = Inf,
           fill="grey", alpha=0.5) +
   geom_line(aes(x=DateTime, y=pH, color = "pH"),
             size=1) +
   geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
-            size=0.7, alpha = 0.5) +
-  labs(y = "pH",
+            size=1) +
+  labs(y = "pH (Total Scale)",
        x = "Date and Time (EDT)") +
-  scale_y_continuous(limits = c(7.925,7.985), sec.axis = sec_axis(~(.-4.8371)/0.1099)) +
+  scale_y_continuous(limits = c(7.925,7.985),
+                     sec.axis = sec_axis(~(.-4.8371)/0.1099, name="Temperature (\u00B0C)"))  +
   scale_x_datetime(date_breaks = "6 hour",
                    date_minor_breaks = "3 hour",
                    date_labels = "%m/%d\n%H:%M") +
-  annotate("text",
-           label = expression(paste("Temperature (",degree,"C)")),
-           angle=90,
-           x = max(pH$DateTime+(3600*10)),
-           y = 7.95) + 
   coord_cartesian(ylim = c(7.925,7.985),
                     xlim = c(min(pH$DateTime),max(pH$DateTime)),
                     clip = 'off',
@@ -475,10 +463,10 @@ ggplot(data = pH) +
         legend.position = "bottom") +
   annotate("text",
           label = paste("Jun", 25:28),
-          x = seq.POSIXt(as.POSIXct('2021-06-25 13:30:00', tz='EST'),
+          x = seq.POSIXt(as.POSIXct('2021-06-25 17:30:00', tz='EDT'),
                          by = "day", length.out = 4),
           y = 7.985)+ 
-  scale_color_manual(values=c("darkorange", "coral1"))
+  scale_color_manual(values=c("black", "red"))
 
 ```
 
@@ -490,17 +478,17 @@ current$ws.adj<-(current$ws * scaleFactor)
 
 ggplot(data = light) +
   annotate("rect",
-          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:00:00', tz='EST'),
+          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
                          by = "day", length.out = 3),
-          xmax = seq.POSIXt(as.POSIXct('2021-06-26 08:00:00', tz='EST'),
+          xmax = seq.POSIXt(as.POSIXct('2021-06-26 05:45:00', tz='EST'),
                          by = "day", length.out = 3),
           ymin = -Inf, ymax = Inf,
           fill="grey", alpha=0.5) +
   geom_line(aes(x=DateTime, y=PAR, color = "PAR"),
             size=1) +
   geom_line(data= current, aes(x=date, y=ws.adj, color = "Current Speed"),
-            size=0.7, alpha = 0.5) +
-  labs(y = "PAR",
+            size=1) +
+  labs(y = expression(paste("Photosynthetically Available Radiation (",mu,"mol photons m"^-2,"s"^-1,")")),
        x = "Date and Time (EDT)") +
   scale_y_continuous(limits = c(0,455), sec.axis = sec_axis(~./scaleFactor, name="Current Speed (cm/s)", breaks = seq(1,12,2)))+
   scale_x_datetime(date_breaks = "6 hour",
@@ -515,31 +503,37 @@ ggplot(data = light) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
           plot.margin = unit(c(1,3,1,1), "lines"),
         legend.position = "bottom") +
-  annotate("text",
-          label = paste("Jun", 25:28),
-          x = seq.POSIXt(as.POSIXct('2021-06-25 13:30:00', tz='EST'),
-                         by = "day", length.out = 4),
-          y = 450)+ 
-  scale_color_manual(values=c("dodgerblue", "aquamarine4"))
+  scale_color_manual(values=c("dodgerblue", "goldenrod1"))
 
 
 ```
 
 
-<font size="2"> **Figure 2:**  Summary plots of pH paired with Temperature, and  current speed paired with PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Instruments measured parameters every 5 minutes. </font>
+<font size="2"> **Figure 3:**   pH,  temperature, current and PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Grey blocks denote night time through out sequence of plot. Instruments measured parameters every 5 minutes. </font>
 
 -----
 
-### Summary table
+### Other Deliverables
+
+Other data variables were collected during this trip but the data is not immediatelly available.
+
+Calcification Accretion Units (CAUs) and Bioerosion Monitoring Units (BMUs) and collected and redpoyed for the next sampling cycle. CAUs are processed by the Pacific Climate group and the data will be available within a year. BMUs are first dried and then cleaned using a dilute hydrogen peroxide solution. These samples are then weighed and scanned using a Macro CT scanner and compared to information from pre-scans. Data will be available in a year. Please reference previous datasets for more information.
+
+![CAU and BMU pair after being deployed for 3 years](Data/CAUBMU.jpg){width=50%}
+
+
+24 water samples were collected using the SAS. la de da add info about this.
+
+
 
 ### By year and region
 
 Data | Number of observations | Days running | Notes
 ------|-----------------------|--------------|-------
 Temperature (STRs)| 1.1 million | 700 days| 4 depths
-pH | number| number| number| 1 depth 
-Light| number| number| number| 1 depth
-Current| number| number| number| 1 depth
+pH | 879 | 3 days| 1 depth 
+Light| 876 | 3 days | 1 depth
+Current| 880 | 3 days | 1 depth
 
 -----
 
@@ -552,7 +546,14 @@ CRCP monitoring efforts aim to:
 * Track and assess changes in reef communities in response to environmental stressors or human activities.
 * Evaluate the effectiveness of specific management strategies and identify actions for future and adaptive responses.
 
-![New STR depolyed at White Shoal in Dry Tortugas National Park](Data/STRfish.jpg)
+
+### Point of Contact
+
+Atlantic Climate team lead: nicole.besemer@noaa.gov
+
+Principal Investigator: ian.enochs@noaa.gov
+
+NCRMP Coordinator: erica.towle@noaa.gov
 
 
 ### For more information
@@ -564,6 +565,23 @@ NCRMP climate page: https://www.coris.noaa.gov/monitoring/climate.html
 NOAA Atlantic Oceanographic and Meteorological Laboratory:
 http://www.aoml.noaa.gov/
 
-Atlantic Climate team lead: nicole.besemer@noaa.gov
+[Florida Coral Reef Status Report 2020](https://www.coris.noaa.gov/monitoring/status_report/docs/FL_508_compliant.pdf)
 
-NCRMP Coordinator: erica.towle@noaa.gov
+
+
+### Acknowledgements
+
+
+These efforts were jointly funded by NOAA's CRCP and OAP. We would like to thank the National Park Service and Florida Keys National Marine Sanctuary for permitting support and the ANGARI Foudnation for field support.
+<p float="left">
+   <img src="Logos/CRCP.jpeg" width="100" />
+   <img src="Logos/OAP.png" width="100" />
+ </p>
+
+
+### Our Team
+
+![Field team members: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel](Data/Fieldteam.jpg){width=50%}
+
+
+
