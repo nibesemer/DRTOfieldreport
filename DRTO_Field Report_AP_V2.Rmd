@@ -1,12 +1,12 @@
 ---
 output:
-  word_document: default
-  pdf_document: default
-  always_allow_html: true
   html_document:
     fig_height: 5
     fig_width: 5
     fig_position: center
+  pdf_document: default
+  always_allow_html: true
+  word_document: default
 ---
 
 <h2 style="color: darkblue;font size=24, align=center" > National Coral Reef Monitoring Program</h2> 
@@ -410,7 +410,7 @@ pH_Temp_Plot<-ggplot(data = pH) +
   #Aesthetics
   theme_bw() +
   theme(#axis.text.x = element_text(angle = 0, hjust = 0.5),
-        plot.margin = unit(c(1,1,1,1), "lines"),
+        plot.margin = unit(c(1,1,0.5,1), "lines"),
         legend.position = "none",
         panel.grid = element_blank(),
         axis.title.x=element_blank(), 
@@ -464,7 +464,7 @@ Light_Current<-ggplot(data = light) +
   #Aesthetics
   theme_bw() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
-          plot.margin = unit(c(1,1,1,1), "lines"),
+          plot.margin = unit(c(0.5,1,0.1,1), "lines"),
           legend.position = "none",
           panel.grid = element_blank()
         )
@@ -473,7 +473,29 @@ Light_Current<-ggplot(data = light) +
 
 
 ```{r Diurnal_Suite_Plot, echo=FALSE, warning=FALSE, fig.width = 8,fig.height = 7}
-ggarrange(pH_Temp_Plot, Light_Current, ncol=1)
+Legend1<-pH_Temp_Plot + theme(legend.position = "bottom",
+                              legend.title = element_blank())
+                              
+  Legend1<-get_legend(Legend1)
+  #ggdraw(Legend1)
+
+Legend2<-Light_Current + theme(legend.position = "bottom",
+                              legend.title = element_blank())
+  Legend2<-get_legend(Legend2)
+
+  #ggdraw(Legend2)
+  
+ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
+                           Light_Current,
+                           ncol=1, align='v', 
+                           rel_heights = c(0.9, 1)),
+                 plot_grid(Legend1, Legend2, ncol=2), 
+                 ncol = 1, rel_heights=c(1, 0.1)))
+```
+
+
+```{r Diurnal_SuPlotv1, echo=FALSE, warning=FALSE, fig.width = 8,fig.height = 7}
+#ggarrange(pH_Temp_Plot, Light_Current, ncol=1)
 ```
 
 <font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 25th to 28th. Top panel: pH and temperature. Bottom panel: current speed and Photosynthetically Available Radiation (PAR). Grey blocks denote night time throughout sequence of plot. Instruments measured parameters every 5 minutes. </font>
