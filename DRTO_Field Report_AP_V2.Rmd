@@ -1,15 +1,59 @@
 ---
 output:
-  html_document: default
   word_document: default
-  always_allow_html: true
   pdf_document: default
+  always_allow_html: true
+  html_document:
+    fig_height: 5
+    fig_width: 5
+    fig_position: center
 ---
 
-<h2 style="color: darkblue;font size=24"> National Coral Reef Monitoring Program</h2> 
+<h2 style="color: darkblue;font size=24, align=center" > National Coral Reef Monitoring Program</h2> 
 <h2 style="color: darkblue;font size=12"> Climate Monitoring Brief: Dry Tortugas National Park</h2>
 --------
-![New Subsurface Temperature Recorder depolyed at White Shoal in Dry Tortugas National Park](Data/STRfish.jpg){width=75%}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                message = FALSE, warning = FALSE, 
+                fig.align = "center")
+options(htmltools.dir.version = FALSE)
+```
+
+ 
+```{r libraries, include=FALSE}
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(plotly)
+library(scales)
+library(ggpubr)
+library(RColorBrewer)
+library(scales)
+library(openair)
+library(magick)
+library(ggplot2)
+library(cowplot)
+library(knitr)
+
+# Map
+library(leaflet)
+
+# Dynamic html to static
+#install.packages("webshot")
+library(webshot)
+#webshot::install_phantomjs()
+#library(PhantomJS)
+```
+
+
+```{r front, echo=FALSE, out.width = '75%', fig.cap="New Subsurface Temperature Recorder depolyed at White Shoal in Dry Tortugas National Park", fig.align='center'}
+
+knitr::include_graphics("Data/STRfish.jpg")
+
+```
+
 <br>
 
 <h4 style="font size=8">
@@ -23,90 +67,98 @@ National Oceanic Atmospheric Administration</h4>
 N. Besemer, A. Palacio, M. Jankulak, G. Kolodziej, I. Enochs - July 2021
 </h5>
 
-<p float="left">
-   <img src="Logos/AOML.jpg" width="100" />
-   <img src="Logos/CIMAS.png" width="100" />
- </p>
+```{r logos, echo=FALSE, fig.align='left', out.width='20%'}
+p1 <- ggdraw() + draw_image("Logos/AOML.jpg", scale = 1)
+p2 <- ggdraw() + draw_image("Logos/CIMAS.png", scale = 0.9)
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      message = FALSE, warning = FALSE, 
-               fig.align = "center")
-options(htmltools.dir.version = FALSE)
+plot_grid(p1, p2)
 ```
 
-```{r libraries, include=FALSE}
-library(tidyverse)
-library(lubridate)
-library(plotly)
-library(scales)
-library(ggpubr)
-library(RColorBrewer)
-library(scales)
-library(openair)
-library(magick)
-library(ggplot2)
-library(knitr)
-# Map
-library(leaflet)
-
-# Dynamic html to static
-#install.packages("webshot")
-library(webshot)
-#webshot::install_phantomjs()
-#library(PhantomJS)
-```
+ 
+--------
 
 ### About this summary brief
 
-The NOAA Atlantic Oceanographic and Meteorolgical Laboratory (AOML) conducts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the U.S. Atlantic and Caribbean coral reef jurisdictions. This FY21 summary brief provides an overview of the most recent survey efforts.
+The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the U.S. Atlantic and Caribbean coral reef jurisdictions. This FY21 summary brief provides an overview of the most recent survey efforts.
 
 
 ### Expedition summary
 
 * The most recent NCRMP Atlantic climate monitoring took place at Dry Tortugas National Park from June 24th to June 29th 2021
-* Four different sites were visited by 5 team members completing a total of 63 dives
-* Subsurface temperature recorders were recovered at all 4 study sites.
-* At the Bird Key Reef, short term instruments were deployed that monitor current, pH, light, bioerosion and calcification. landscape mosaics (n=6) and carbonate budget surveys (n=6) were completed to monitor changes in benthic cover and carbonate production, Bioerosion Monitoring Units (n=5)  and Calcification Accretions Units (n=5) were collected and swaped.
+* Four different sites were visited by 5 team members completing a total of 63 dives. 
+* These sites represent temporal‐resolution monitoring with moored instruments at fixed time‐series which are placed on depth gradient to assess how vertical structure affects reef status and trends.
 
 
-### Spatial sample design
+--------
 
-Survey site locations were selected to represent temporal‐resolution monitoring with moored instruments at fixed time‐series. These sites were placed on depth gradient to assess how vertical structure affects reef status and trends. Pulaski Shoal (1m), White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m) are the selected study sites.
+### Data collection
 
-```{r mapInfo, include=FALSE}
+* Subsurface **temperature** recorders (STRs) were recovered at all 4 study sites, accounting for 1.1 million temperature observations:
+  - Pulaski Shoal (1m): 311,609 observations 
+  - White Shoal (5m): 311,213 observations 
+  - Bird Key Reef (15m): 311,560 observations 
+  - Black Coral Rock (25m): 165,695 observations 
+
+
+* At the Bird Key Reef, short term instruments (72h) were deployed to  monitor daily fluctuations in: 
+  - **Current**: 880 observations
+  - **pH**: 879 observations
+  - **Light**: 876 observations
+  
+  
+* Additionally, changes in benthic cover and carbonate production were monitored at Bird Key Reef by recording:
+  - **Bioerosion**: 5 Bioerosion Monitoring Units (BMUs), 
+  - **Calcification**: 5 Calcification Accretions Units (CAUs)
+  - **Benthic cover**: 6 landscape mosaics
+  - **Carbonate budget surveys**: 6 BL BLA BLA
+
+<br>
+
+```{r mapInfo, include=FALSE, fig.align='center'}
 # Map information
 # Add info from the sampling stations
-stations <- read.csv(textConnection("
-  Site,	Lat,	Long,	Depth
-  Pulaski Shoal,	24.693342,	-82.773034,	1m
-  White Shoal,	24.641420,	-82.896200,	5m
-  Bird Key Reef,	24.611310,	-82.870500,	15m
-  Black Coral Rock,	24.699300,	-83.00218,	25m"))
+stations <- as.data.frame(read.csv(textConnection("
+Site,	Lat,	Long,	Depth
+Pulaski Shoal,	24.693342,	-82.773034,1m
+White Shoal,	24.641420,	-82.896200,5m
+Bird Key Reef,	24.611310,	-82.870500,15m
+Black Coral Rock,	24.699300,	-83.00218,25m")))
 
+stations$Site<-as.character(stations$Site)
+stations$Depth<-as.character(stations$Depth)
+
+stations$Site<-factor(stations$Site, levels = c("NoSite", 
+                                                "Pulaski Shoal",
+                                                "White Shoal",
+                                                "Bird Key Reef",
+                                                "Black Coral Rock"))
+stations$Depth<-ordered(stations$Depth, levels = c("0m", "1m","5m", "15m","25m"))
+
+summary(stations)
 kable(head(stations, format = "html"))
 
 #Change color depending on type of data?
-  #stations$Site<-as.numeric(stations$Site)
-  # pal <- colorNumeric(palette = "YlOrRd", 
-                      #domain = stations$Site)
-  
-  #stations$Site<-as.factor(stations$Site)
-  pal.gen <- colorFactor(palette = "Set1",
+pal.gen <- colorFactor(palette = "Blues",
+                         domain = stations$Depth)
+
+pal.gen2 <- colorFactor(palette = "Blues",
                          domain = stations$Site)
 ```
 
 
-```{r makeAmap, echo=FALSE}
+```{r makeAmap, echo=FALSE, fig.width = 5, fig.height = 4, fig.align='center'}
 leaflet(stations, height = '400px') %>% 
   addTiles() %>%
   addProviderTiles(providers$Esri.WorldImagery)%>%
+  addProviderTiles("Stamen.TonerHybrid")%>%
+  # addProviderTiles(providers$Stamen.TonerLite, 
+  #                  options = providerTileOptions(noWrap = TRUE,
+  #                                                opacity = 0.2))%>%
   #addProviderTiles(providers$CartoDB.Positron) %>% 
-  #addMarkers(icon=coral.icon) %>% 
   addCircleMarkers(lng = ~Long, lat = ~Lat, 
-                   stroke = FALSE, radius = 6, 
+                   stroke = TRUE, radius = 6, 
                    fillOpacity = 1,
-                   color = ~pal.gen(Site),
+                   color = ~pal.gen(Depth),
                    label = ~Depth,
                    labelOptions = labelOptions(
                      noHide = T, direction = "bottom",
@@ -114,18 +166,19 @@ leaflet(stations, height = '400px') %>%
                      style = list(
         "color" = "white")))  %>%
   addLegend(position = "bottomright",
-            pal = pal.gen, 
+            pal = pal.gen2, 
             values = ~Site, opacity = 1) %>%
+   addScaleBar() %>%
   fitBounds(lng1=-83.01, lat=24.7, lng2=-82.76, lat2=24.6)
   
 ```
 <font size="2"> **Figure 1:** Map of study sites in Dry Tortugas National Park area </font>
 
-#### Temperature Data
+-----
 
-Subsurface Temperature Recorder (STR)s made by SeaBird Electronics were placed at all 4 sites and collected temperature measurements at 5-minute intervals for 3 years.
+#### Temperature
 
-
+Three years of temperature measurements were retrieved and processed from all 4 sites (depths). Temperature was measured using SeaBird Electronics Subsurface Temperature Recorders (STR)s that collected data at 5-minute intervals.
 
 ```{r get Temp, include=FALSE}
 
@@ -151,16 +204,16 @@ Subsurface Temperature Recorder (STR)s made by SeaBird Electronics were placed a
   # 20m data
   str25 <- read_csv('Data/DRTOSTRs/DRTO_west_25m_sn7784_tag3091_black-coral-rock_2018-07-12_2020-02-07_processed.csv',col_types = cols())
   str25$Depth<-"25m"
-  head(str25)
+  #head(str25)
 
 # 2. Bind all data and order depth  
   str_all<-rbind(str01, str05, str15, str25)
-  str_all$Depth<-factor(str_all$Depth, levels = c("1m", "5m", "15m", "25m"))
+  str_all$Depth<-factor(str_all$Depth, levels = c("0m", "1m", "5m", "15m", "25m"))
 
 ```
 
 ```{r Tempvariables, include=FALSE}
-# 3. Define limits for temperature and time (if we want to follow Mike's, this is not really needed with my way of plotting)
+# 3. Define limits for temperature and time (if we want to follow Mike's to automate)
   globalMinDate <- min(str_all$UTCDateTime)
   globalMinTemp <- min(str_all$Temperature)
   globalMaxDate <- max(str_all$UTCDateTime)
@@ -168,20 +221,15 @@ Subsurface Temperature Recorder (STR)s made by SeaBird Electronics were placed a
 
 # 4. Define breaks in the x axis
   if ((globalMaxDate-globalMinDate) > 365.25) {
-    xWidth <- "4 months"
+    xWidth <- "6 months"
   } else {
-    xWidth <- "1 month"
+    xWidth <- "2 months"
   }
 
 ```
 
-Plot option 1:  
 
-```{r plot temperature option 1, echo=FALSE,fig.width = 8.5,fig.height = 4.5}
-
-# This is one option using colors to plot all temp data in the same plot (easy to see differences). If that is too much we can facet the data (opcion 2)
-
-depth_color<-c("lightskyblue1", "skyblue2", "deepskyblue3", "navyblue")
+```{r plot STR temperature, echo=FALSE, fig.width = 8, fig.height = 4}
 
 plot<-ggplot(data = str_all) +
       geom_line(aes(x = ymd_hms(UTCDateTime), 
@@ -189,83 +237,115 @@ plot<-ggplot(data = str_all) +
                 size=0.3) +
   
   theme_bw() +
-  theme(axis.title.x = element_blank(),
-        legend.position = c(0.5, 0.05) ,
+  theme(#axis.title.x = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = c(0.5, 0.93),
+        #legend.position = c(0.5, 0.05) ,
         legend.direction = "horizontal" ,
-        plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  scale_color_manual(values=depth_color)+
+        plot.margin = unit(c(5.5, 5.5, 5.5, 5.5), "points"),
+        legend.title = element_blank(),
+        #legend.box.background = element_rect(colour = "black")
+        ) +
+   scale_color_brewer(palette="Blues")+
       
   scale_x_datetime(breaks = breaks_width(xWidth),
-                       labels = date_format("%m/%Y"),
-                       limits = c(globalMinDate, globalMaxDate)) +
-  scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp)) +
-      ylab(expression(atop(
-        paste("Temperature (", degree, "C)")
-      ))) 
+                   labels = date_format("%m/%Y"),
+                   limits = c(globalMinDate, globalMaxDate),
+                   name="Date") +
+  scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp+1.5),
+                     name=(expression(paste("Temperature (", 
+                                            degree, "C)"))),
+                     breaks = seq(0,50,2.5)) 
       
     
 box <- ggplot(data = str_all) +
-      geom_boxplot(aes(x = "", y = Temperature, fill=Depth)) +
-      theme_bw() +
-      theme(axis.title.x = element_blank(),
-            axis.title.y = element_blank(),
-            legend.position = "none")+
-      scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp))+
-  scale_fill_manual(values=depth_color)
+       geom_boxplot(aes(x = Depth, y = Temperature, fill=Depth)) +
+       theme_bw() +
+       theme(panel.grid = element_blank(),
+             axis.text.y = element_blank(),
+             #axis.title.x = element_blank(),
+             axis.title.y = element_blank(),
+             legend.position = "none")+
+      
+  scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp+1.5),
+                     breaks = seq(0,50,2.5))+
+      scale_fill_brewer(palette="Blues")
     
-Figure2 <- ggarrange(plot, box, widths = c(8, 2))
-Figure2    
+Figure2 <- ggarrange(plot, box, widths = c(8/10, 2/10))
+ 
 ```
 
-<font size="2"> **Figure 2:** Temperature data collected for 3 years at four sites in the Dry Tortugas at 1 m (Pulaski Shoal Lighthouse), 5m (White Shoal), 15m (Bird Key Reef) and 25 m (Black Coral Rock).The 1m, 5m, and 15m collected data for the full deployment. The 25m STR stopped collecting on Febuary 7th 2020. </font>
+
+```{r, echo = F, fig.width = 8, fig.height = 4}
+Figure2
+```
+
+<font size="2"> **Figure 2:** Temperature conditions at four sites in the Dry Tortugas representing a depth gradient: Pulaski Shoal Lighthouse (1m) White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m). Data were collected from November 2018 to June 2021, with the exception of the 25m STR that recorded until February 7th 2020. </font>
  
+```{r, echo = F}
+#Temp.Depth <- plyr::ddply (str_all, .(Depth), summarise,
+#                Tmin = min (Temperature, na.rm = F), 
+#                Tmax = max (Temperature, na.rm = F),
+#                Tmean = mean (Temperature, na.rm = F), 
+#                Tsd = sd (Temperature, na.rm = F))
+#kable(as.data.frame(Temp.Depth, format = "markdown"))
+```
+
+Temperature values were similar among the 1m, 5m and 15m depths with the lowest temperatures recorded during February 2021 (20.8, 20.7, and 19.9 $^\circ$C, respectively) and the the higest temperatures during the summer of 2019 and 2020 (31.7, 31.6, and 31.5 $^\circ$C, respectively). The 25m STR detected consistent temperature stratification at this site during the summers when it was active. Temperatures were XX to YY $^\circ$C below the values at other depths. 
+
 -----
 
 #### Diurnal Suite Deployment
 
-At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite. SeaFET pH logger, Tiltmeter and EcoPAR collected measurements at 5-minute intervals. Subsurface Automatic Samplers (SAS) collected discrete water samples at three-hour intervals (n=24).
+At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite that monitored pH, temperature, light and current speed. SeaFET pH logger, Tiltmeter and EcoPAR collected measurements at 5-minute intervals.
 
+```{r pH_and_temp_data, include=FALSE}
 
-```{r diurnal suite data, include = FALSE}
-
-# There is also /DRTO_SeaFET07062021(1).csv, what isthe difference?
-
-# 1. Get current data
-fileAny <- "Data/2102061_DRTO-2021-06_(0)_Current.csv"
-current <- read.csv(fileAny, header = TRUE)
-
-# hardcoded limits for this DRTO file are
-# ymd_hms("2021/06/25 18:30:00") and ymd_hms("2021/06/28 19:45:00")
-# (future enhancement: incorporate Hannah Barkley's dataset trimming code;
-#  also, eliminate all the hardcoding below and calculate from data)
-
-  current$date = ymd_hms(paste0(current$Date, current$Time), tz = "UTC")
-  current <- current[, c("date","Speed..cm.s.","Heading..degrees.")]
-  colnames(current) <- c("date","ws","wd")
-  current$DateTime<-NA
-  current <- subset(current, date >= ymd_hms("2021/06/25 18:30:00") &
-                      date <= ymd_hms("2021/06/28 19:45:00"))
-  current$DateTime <- lubridate::with_tz(current$date, "America/New_York")
-
-
-# 2.Get the pH data
+# 1.Get the pH data
 pH <- read_csv('Data/DRTO_SeaFET07062021.csv',col_types = cols()) %>%
     select(DateTime = `DateTime (UTC+00:00)`,
            pH = `Internal pH (pH)`,
            Temperature = `pH Temperature (Celsius)`) %>%
     mutate(DateTime = parse_date_time(DateTime, '%m/%d/%Y %H:%M')) %>%
     #manual start/stop time of monitoring
-   filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
+    filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
          DateTime <= as.POSIXct('2021-06-28 19:45:00', tz='UTC')) %>%
-  mutate(DateTime = with_tz(DateTime, 'America/New_York'))
+    mutate(DateTime = with_tz(DateTime, 'America/New_York'))
+```
 
-# 3.join current and pH 
-  joinedPhTilt<-merge(pH,current, by.x="DateTime", by.y = "DateTime")
-  names(joinedPhTilt)[4]<-'UTCdateTime'
-  
-  
-# 4. Get the PAR data  
-  light <- read_csv('Data/DRTO_EcoPAR07062021.csv',col_types = cols()) %>%
+
+```{r Current_data, include=FALSE}
+# There is also /DRTO_SeaFET07062021(1).csv, what isthe difference?
+
+# 2. Get current data
+fileAny <- "Data/2102061_DRTO-2021-06_(0)_Current.csv"
+  # Are there going to be more than one current file? 
+  current <- read.csv(fileAny, header = TRUE)
+  summary(current)
+
+# hardcoded limits for this DRTO file are
+# ymd_hms("2021/06/25 18:30:00") and ymd_hms("2021/06/28 19:45:00")
+# (future enhancement: incorporate Hannah Barkley's dataset trimming code; also, eliminate all the hardcoding below and calculate from data)
+
+  current$date = ymd_hms(paste0(current$Date, current$Time), 
+                         tz = "UTC")
+  current <- current[, c("date","Speed..cm.s.","Heading..degrees.")]
+  colnames(current) <- c("date","ws","wd")
+  #manual start/stop time of monitoring
+  current$DateTime<-NA
+  current <- subset(current, date >= ymd_hms("2021/06/25 18:30:00") &
+                      date <= ymd_hms("2021/06/28 19:45:00"))
+  current$DateTime <- lubridate::with_tz(current$date,
+                                         "America/New_York")
+
+```
+
+
+```{r PAR_data, include = FALSE}
+
+# 3. Get the PAR data  
+  light <- read_csv('Data/DRTO_EcoPAR07062021.csv',
+                    col_types = cols()) %>%
           mutate(DateTime = mdy_hms(paste(Date, Time))) %>%
           select(DateTime, `PAR (CALC)`) %>%
           drop_na() %>%
@@ -284,157 +364,17 @@ pH <- read_csv('Data/DRTO_SeaFET07062021.csv',col_types = cols()) %>%
 ```
 
 
+```{r ph and temp combined v3,echo=FALSE, warning=FALSE,fig.width = 8, fig.height = 3.5}
 
-```{r ph temp current light,echo=FALSE, warning=FALSE,include=FALSE, fig.width = 12,fig.height = 14, eval= FALSE}
-# line plot (Current Speed)
-currentline<-ggplot(data = joinedPhTilt) +
-  geom_line(aes(x = DateTime, y = ws), col = 'dodgerblue') +
-  theme_bw() +
-  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  scale_x_datetime(breaks = date_breaks("8 hours"),
-                   labels = date_format("%m/%d\n%H:%M",
-                                        tz="America/New_York"),
-                   limits = c(ymd_hms("2021/06/25 16:00:00",
-                                         tz="America/New_York"),
-                             ymd_hms("2021/06/28 16:00:00",
-                             tz="America/New_York")),
-                   expand=c(0,0)) +
-  ylab(expression(atop("Current Speed (cm/s)"))) +
-  xlab(expression(atop("Date and Time (EDT)"))) +
-  scale_y_continuous(expand=c(0,0),limits=c(0,12))
+#pH and temp combined 
 
-
-# line plot (pH)
-phline<-ggplot(data = joinedPhTilt) +
-  geom_line(aes(x = DateTime, y = pH), col = 'dark orange') +
-  theme_bw() +
-  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  scale_x_datetime(breaks = date_breaks("8 hours"),
-                   labels = date_format("%m/%d\n%H:%M",
-                                        tz="America/New_York"),
-                   limits = c(ymd_hms("2021/06/25 16:00:00",
-                                         tz="America/New_York"),
-                             ymd_hms("2021/06/28 16:00:00",
-                             tz="America/New_York")),
-                   expand=c(0,0)) +
-  ylab(expression(atop("pH"))) +
-  xlab(expression(atop("Date and Time (EDT)"))) +
-  scale_y_continuous(expand=c(0,0),limits=c(7.925,7.985))
-
-
-# line plot (Temperature)
-templine<-ggplot(data = joinedPhTilt) +
-  geom_line(aes(x = DateTime, y = Temperature), col = 'coral1') +
-  theme_bw() +
-  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  scale_x_datetime(breaks = date_breaks("8 hours"),
-                  labels = date_format("%m/%d\n%H:%M",
-                                        tz="America/New_York"),
-                   limits = c(ymd_hms("2021/06/25 16:00:00",
-                                         tz="America/New_York"),
-                             ymd_hms("2021/06/28 16:00:00",
-                             tz="America/New_York")),
-                   expand=c(0,0)) +
-  ylab(expression(atop(paste("Temperature (", degree, "C)")))) +
-  xlab(expression(atop("Date and Time (EDT)"))) +
-  scale_y_continuous(expand=c(0,0),limits=c(28.0,28.8))
-
-
-# line plot (PAR)
-PARline<-ggplot(data = light) +
-  geom_line(aes(x = DateTime, y = PAR), col = 'aquamarine4') +
-  theme_bw() +
-  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  scale_x_datetime(breaks = date_breaks("8 hours"),
-                  labels = date_format("%m/%d\n%H:%M",
-                                        tz="America/New_York"),
-                   limits = c(ymd_hms("2021/06/25 16:00:00",
-                                         tz="America/New_York"),
-                             ymd_hms("2021/06/28 16:00:00",
-                             tz="America/New_York")),
-                   expand=c(0,0)) +
-  ylab(expression(atop(paste("PAR (",mu,"mol photons m"^-2,"s"^-1,")")))) +
-  xlab(expression(atop("Date and Time (EDT)"))) 
-
-
-figure3a<-ggarrange(phline, templine, currentline, PARline, ncol=1)
-figure3a
-```
-
-
-
-```{r ph and temp combined v2,echo=FALSE, warning=FALSE, include=FALSE, fig.width = 12,fig.height = 7}
-
-#ph and temp
-
+# Scale Temperature 
 pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
 
-phtempplot<- ggplot(data = pH) +
-  geom_line(aes(x=DateTime, y=pH),
-            color = "black", size=1) +
-  geom_line(aes(x=DateTime, y=Temp.adj),
-            color = "coral1", size=1, alpha = 0.5) +
-  
-  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  theme_bw() +
-  
-  scale_x_datetime(breaks = date_breaks("8 hours"),
-                  labels = date_format("%m/%d\n%H:%M",
-                                        tz="America/New_York"),
-                  limits = c(ymd_hms("2021/06/25 16:00:00",
-                                         tz="America/New_York"),
-                             ymd_hms("2021/06/28 16:00:00",
-                             tz="America/New_York")),
-                   expand=c(0,0)) +
-  ylab(expression(atop(paste("pH")))) +
-  xlab(expression(atop("Date and Time (EDT)"))) +
-  scale_y_continuous(limits = c(7.925,7.985),
-                     sec.axis = sec_axis(~(.-4.8371)/0.1099, name="Temperature (\u00B0C)")) 
 
-
-##light and current
-scaleFactor2 <- max(light$PAR) / max(current$ws)
-current$ws.adj<-(current$ws * scaleFactor2)
-colors <- c("PAR" = "aquamarine4", "ws.adj" = "dodgerblue")
-
-
-parcurrentplot<- ggplot() +
-  geom_line(data = light, aes(x=DateTime, y=PAR),color = "aquamarine4", size=1) +
-  geom_line(data = current, aes(x=date, y=ws.adj),
-            color = "dodgerblue", size=1, alpha = 0.5) +
-  
-  theme(plot.margin = unit(c(5.5, 15, 5.5, 5.5), "points")) +
-  theme_bw() +
-  
-  scale_x_datetime(breaks = date_breaks("8 hours"),
-                  labels = date_format("%m/%d\n%H:%M",
-                                        tz="America/New_York"),
-                  limits = c(ymd_hms("2021/06/25 16:00:00",
-                                         tz="America/New_York"),
-                             ymd_hms("2021/06/28 16:00:00",
-                             tz="America/New_York")),
-                   expand=c(0,0),
-                  name="Date and Time (EDT)") +
-  scale_y_continuous(limits = c(0,500),
-                     name=(expression(atop(paste
-                      ("PAR (",mu,"mol photons m"^-2,"s"^-1,")")))),
-                    sec.axis = sec_axis(~./scaleFactor2,
-                    name="Current Speed (cm/s)",
-                    breaks = seq(0,12,2)))
-
-
-figure3b<-ggarrange(phtempplot, parcurrentplot, ncol=1)
-figure3b
-
-```
-
-
-
-```{r ph and temp combined v3,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 6}
-#pH and temp combined -----
-pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
-
-ggplot(data = pH) +
+# Plot
+pH_Temp_Plot<-ggplot(data = pH) +
+  # Day/Night
   annotate("rect",
           xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
                          by = "day", length.out = 3),
@@ -442,41 +382,52 @@ ggplot(data = pH) +
                          by = "day", length.out = 3),
           ymin = -Inf, ymax = Inf,
           fill="grey", alpha=0.5) +
-  geom_line(aes(x=DateTime, y=pH, color = "pH"),
-            size=1) +
-  geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
-            size=1) +
-  labs(y = "pH (Total Scale)",
-       x = "Date and Time (EDT)") +
-  scale_y_continuous(limits = c(7.925,7.985),
-                     sec.axis = sec_axis(~(.-4.8371)/0.1099, name="Temperature (\u00B0C)"))  +
-  scale_x_datetime(date_breaks = "6 hour",
-                   date_minor_breaks = "3 hour",
-                   date_labels = "%m/%d\n%H:%M") +
-  coord_cartesian(ylim = c(7.925,7.985),
-                    xlim = c(min(pH$DateTime),max(pH$DateTime)),
-                    clip = 'off',
-                    expand = T) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
-          plot.margin = unit(c(1,3,1,1), "lines"),
-        legend.position = "bottom") +
-  annotate("text",
+   annotate("text",
           label = paste("Jun", 25:28),
-          x = seq.POSIXt(as.POSIXct('2021-06-25 17:30:00', tz='EDT'),
+          x = seq.POSIXt(as.POSIXct('2021-06-25 15:00:00', tz='EST'),
                          by = "day", length.out = 4),
           y = 7.985)+ 
-  scale_color_manual(values=c("black", "red"))
-
+  # Data
+  geom_line(aes(x=DateTime, y=pH, color = "pH"),
+            size=0.8) +
+  geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
+            size=0.8) +
+  scale_color_manual(values=c("black", "red"))+
+  # Axes
+  scale_y_continuous(limits = c(7.925,7.985),
+                     name="pH \n (Total scale)",
+                     sec.axis = sec_axis(~(.-4.8371)/0.1099,
+                                name="Temperature \n (\u00B0C)"))  +
+  scale_x_datetime(name="Date and Time (EDT)",
+                  date_breaks = "6 hour",
+                  #date_minor_breaks = "1 hour",
+                  labels = date_format("%m/%d\n%H:%M",
+                                        tz="America/New_York"))+
+  coord_cartesian(ylim = c(7.925,7.985),
+                  xlim = c(min(pH$DateTime),max(pH$DateTime)),
+                  clip = 'off',
+                  expand = T) +
+  #Aesthetics
+  theme_bw() +
+  theme(#axis.text.x = element_text(angle = 0, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "lines"),
+        legend.position = "none",
+        panel.grid = element_blank(),
+        axis.title.x=element_blank(), 
+        axis.text.x=element_blank())
+ 
 ```
 
-```{r light and current compbined,echo=FALSE, warning=FALSE,fig.width = 12,fig.height = 6}
+```{r light and current compbined,echo=FALSE, warning=FALSE,fig.width = 8, fig.height = 3.5}
 
+# Scale current
 scaleFactor <- max(light$PAR) / max(current$ws)
 current$ws.adj<-(current$ws * scaleFactor)
 
+# Plot
+Light_Current<-ggplot(data = light) +
 
-ggplot(data = light) +
+  # Day/Night
   annotate("rect",
           xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
                          by = "day", length.out = 3),
@@ -484,56 +435,70 @@ ggplot(data = light) +
                          by = "day", length.out = 3),
           ymin = -Inf, ymax = Inf,
           fill="grey", alpha=0.5) +
+  
+  # Data
   geom_line(aes(x=DateTime, y=PAR, color = "PAR"),
-            size=1) +
+            size=0.8) +
   geom_line(data= current, aes(x=date, y=ws.adj, color = "Current Speed"),
-            size=1) +
-  labs(y = expression(paste("Photosynthetically Available Radiation (",mu,"mol photons m"^-2,"s"^-1,")")),
-       x = "Date and Time (EDT)") +
-  scale_y_continuous(limits = c(0,455), sec.axis = sec_axis(~./scaleFactor, name="Current Speed (cm/s)", breaks = seq(1,12,2)))+
-  scale_x_datetime(date_breaks = "6 hour",
-                   date_minor_breaks = "3 hour",
-                   date_labels = "%m/%d\n%H:%M") +
+            size=0.8) +
+  scale_color_manual(values=c("navyblue", "goldenrod1"))+
+  
+  # Axes
+  scale_y_continuous(limits = c(0,455), 
+                     name=expression(atop(paste("PAR\n (",mu,"mol photons m"^-2,"s"^-1,")"))),
+                     sec.axis = sec_axis(~./scaleFactor, 
+                                name="Current Speed \n (cm/s)",
+                                breaks = seq(1,12,2)))+
+                       
+  scale_x_datetime(name="Date and Time (EDT)",
+                   date_breaks = "6 hour",
+                   #date_minor_breaks = "1 hour",
+                   labels = date_format("%m/%d\n%H:%M",
+                                        tz="America/New_York")) +
 
   coord_cartesian(ylim = c(0,455),
-                    xlim = c(min(light$DateTime),max(light$DateTime)),
-                    clip = 'off',
-                    expand = T) +
+                  xlim = c(min(light$DateTime),max(light$DateTime)),
+                  clip = 'off',
+                  expand = T) +
+  
+  #Aesthetics
   theme_bw() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
-          plot.margin = unit(c(1,3,1,1), "lines"),
-        legend.position = "bottom") +
-  scale_color_manual(values=c("dodgerblue", "goldenrod1"))
-
+          plot.margin = unit(c(1,1,1,1), "lines"),
+          legend.position = "none",
+          panel.grid = element_blank()
+        )
 
 ```
 
 
-<font size="2"> **Figure 3:**   pH,  temperature, current and PAR collected from instrument deployment at Bird Key Reef site around 15 meters from June 25th to June 28th. Grey blocks denote night time through out sequence of plot. Instruments measured parameters every 5 minutes. </font>
+```{r Diurnal_Suite_Plot, echo=FALSE, warning=FALSE, fig.width = 8,fig.height = 7}
+ggarrange(pH_Temp_Plot, Light_Current, ncol=1)
+```
+
+<font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 25th to 28th. Top panel: pH and temperature. Bottom panel: current speed and Photosynthetically Available Radiation (PAR). Grey blocks denote night time throughout sequence of plot. Instruments measured parameters every 5 minutes. </font>
+
+
+As part of the diurnal suite, discrete water samples were collected at three-hour intervals (n=24) using Subsurface Automatic Samplers (SAS). THIS SAMPLES WILL BE ANALIZED TO ASSESS BLA BLA BLA
+
+MAYBE ADD A PICTURE IF THE SAS AND OR LINK TO SAS PAGE
+
 
 -----
 
-### Other Deliverables
+#### Other Deliverables
 
-Other data variables were collected during this trip but the data is not immediatelly available.
+* **Calcification Accretion Units (CAUs)** and **Bioerosion Monitoring Units (BMUs)** were collected and redeployed for the next sampling cycle. CAUs are processed by the Pacific Climate group and the data will be available within a year. BMUs will be dried and cleaned using a hydrogen peroxide solution. These samples will be weighed and scanned using a Macro CT scanner and then compared to their pre-scans to quantify bioerosion. Data will be available in a year. Please reference previous datasets for more information.
 
-Calcification Accretion Units (CAUs) and Bioerosion Monitoring Units (BMUs) and collected and redpoyed for the next sampling cycle. CAUs are processed by the Pacific Climate group and the data will be available within a year. BMUs are first dried and then cleaned using a dilute hydrogen peroxide solution. These samples are then weighed and scanned using a Macro CT scanner and compared to information from pre-scans. Data will be available in a year. Please reference previous datasets for more information.
+```{r BMUs, echo=FALSE, out.width = '50%', fig.cap="CAU and BMU pair after being deployed for 3 years", fig.align='center'}
 
-![CAU and BMU pair after being deployed for 3 years](Data/CAUBMU.jpg){width=50%}
+knitr::include_graphics("Data/CAUBMU.jpg")
 
+```
 
-24 water samples were collected using the SAS. la de da add info about this.
+<font size="2"> **Figure 4:** CAU and BMU pair after being deployed for 3 years WHAT IS ON THE TOP AND BOTTOM? DESCROBE THE PICTURE BETTER</font>
 
-
-
-### By year and region
-
-Data | Number of observations | Days running | Notes
-------|-----------------------|--------------|-------
-Temperature (STRs)| 1.1 million | 700 days| 4 depths
-pH | 879 | 3 days| 1 depth 
-Light| 876 | 3 days | 1 depth
-Current| 880 | 3 days | 1 depth
+* **Landscape mosaics** (n=6) and **carbonate budget** surveys (n=6) were completed to monitor changes in benthic cover and carbonate production
 
 -----
 
@@ -560,7 +525,7 @@ NCRMP Coordinator: erica.towle@noaa.gov
 
 Coral Reef Conservation Program: http://coralreef.noaa.gov
 
-NCRMP climate page: https://www.coris.noaa.gov/monitoring/climate.html
+NCRMP climate monitoring: https://www.coris.noaa.gov/monitoring/climate.html
 
 NOAA Atlantic Oceanographic and Meteorological Laboratory:
 http://www.aoml.noaa.gov/
@@ -572,16 +537,25 @@ http://www.aoml.noaa.gov/
 ### Acknowledgements
 
 
-These efforts were jointly funded by NOAA's CRCP and OAP. We would like to thank the National Park Service and Florida Keys National Marine Sanctuary for permitting support and the ANGARI Foudnation for field support.
-<p float="left">
-   <img src="Logos/CRCP.jpeg" width="100" />
-   <img src="Logos/OAP.png" width="100" />
- </p>
+These efforts were jointly funded by NOAA's CRCP and OAP. We would like to thank the National Park Service and Florida Keys National Marine Sanctuary for permitting support and the ANGARI Foundation for field support.
+
+```{r fundingsources, include=FALSE, fig.align='left', out.width='20%'}
+F1 <- ggdraw() + draw_image("Logos/CRCP.jpeg", scale = 0.8)
+F2 <- ggdraw() + draw_image("Logos/OAP.png", scale = 1.2)
+
+funding<-plot_grid(F1, F2)
+```
+
+```{r funding, echo=FALSE, fig.align='left', out.width='20%'}
+funding
+```
 
 
 ### Our Team
 
-![Field team members: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel](Data/Fieldteam.jpg){width=50%}
+```{r team, echo=FALSE, out.width = '50%', fig.align='left'}
+knitr::include_graphics("Data/Fieldteam.jpg")
+```
 
-
+**Field team members**: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel
 
