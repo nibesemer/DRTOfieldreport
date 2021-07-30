@@ -9,7 +9,8 @@ output:
   word_document: default
 ---
 
-<h2 style="color: darkblue;font size=24, align=center" > National Coral Reef Monitoring Program</h2> 
+<h1 style="color: darkblue;font size=24, align=center" > National Coral Reef Monitoring Program</h1> 
+
 <h2 style="color: darkblue;font size=12"> Climate Monitoring Brief: Dry Tortugas National Park</h2>
 --------
 
@@ -48,7 +49,7 @@ library(webshot)
 ```
 
 
-```{r front, echo=FALSE, out.width = '75%', fig.cap="New Subsurface Temperature Recorder depolyed at White Shoal in Dry Tortugas National Park", fig.align='center'}
+```{r front, echo=FALSE, out.width = '75%', fig.cap="New Subsurface Temperature Recorder deployed at White Shoal in Dry Tortugas National Park", fig.align='center'}
 
 knitr::include_graphics("Data/STRfish.jpg")
 
@@ -93,7 +94,7 @@ The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts th
 
 ### Data collection
 
-* Subsurface **temperature** recorders (STRs) were recovered and redeployed at all 4 study sites, accounting for 1.1 million temperature observations:
+* Subsurface **temperature** recorders (STRs) were recovered and redeployed at all 4 study sites (Fig. 1), accounting for 1.1 million temperature observations:
   - Pulaski Shoal (1m): 311,609 observations 
   - White Shoal (5m): 311,213 observations 
   - Bird Key Reef (15m): 311,560 observations 
@@ -127,31 +128,48 @@ Black Coral Rock,	24.699300,	-83.00218,25m")))
 stations$Site<-as.character(stations$Site)
 stations$Depth<-as.character(stations$Depth)
 
-stations$Site<-factor(stations$Site, levels = c("NoSite", 
+stations$Site<-factor(stations$Site, levels = c("NoSite0",
+                                                "NoSite1",
                                                 "Pulaski Shoal",
                                                 "White Shoal",
                                                 "Bird Key Reef",
                                                 "Black Coral Rock"))
-stations$Depth<-ordered(stations$Depth, levels = c("0m", "1m","5m", "15m","25m"))
+stations$Depth<-ordered(stations$Depth, levels = c("-1m", "0m", "1m","5m", "15m","25m"))
 
-summary(stations)
+#summary(stations)
 kable(head(stations, format = "html"))
 
-#Change color depending on type of data?
-pal.gen <- colorFactor(palette = "Blues",
-                         domain = stations$Depth)
+# Change color depending on type of data?
 
-pal.gen2 <- colorFactor(palette = "Blues",
+  # Create palette 
+  #brewer.pal(n = 9, name = "Blues")
+  #library(RColorBrewer)
+  #my_blues <- c(brewer.pal(9, "Blues")[c(4,5,6,7,8, 9)])
+  
+  # Assigne it to Depht and locations
+  pal.gen <- colorFactor(palette = "Blues",
+                         domain = stations$Depth)
+  brewer.pal(n=6, "Blues")
+
+  pal.gen2 <- colorFactor(palette = "Blues",
                          domain = stations$Site)
+
+# Noth arrow
+  #North <- "Data/North-Arrow.png"
+  
+  myicon <- makeIcon( iconUrl = "Data/North-Arrow.png", 
+                    iconWidth=30,
+                    iconHeight=30)
+
 ```
 
-
 ```{r makeAmap, echo=FALSE, fig.width = 5, fig.height = 4, fig.align='center'}
-leaflet(stations, height = '400px') %>% 
+map<-leaflet(stations, height = '400px') %>% 
   addTiles() %>%
-  addProviderTiles(providers$Esri.WorldImagery)%>%
-  addProviderTiles("Stamen.TonerHybrid")%>%
-  # addProviderTiles(providers$Stamen.TonerLite, 
+  addProviderTiles(providers$Esri.WorldImagery, 
+                   options = providerTileOptions(opacity = 1))%>%
+  addProviderTiles(providers$Stamen.TonerHybrid)%>%
+  #addProviderTiles(providers$Stamen.TonerLite, 
   #                  options = providerTileOptions(noWrap = TRUE,
   #                                                opacity = 0.2))%>%
   #addProviderTiles(providers$CartoDB.Positron) %>% 
@@ -168,11 +186,17 @@ leaflet(stations, height = '400px') %>%
   addLegend(position = "bottomright",
             pal = pal.gen2, 
             values = ~Site, opacity = 1) %>%
-   addScaleBar() %>%
-  fitBounds(lng1=-83.01, lat=24.7, lng2=-82.76, lat2=24.6)
+    addScaleBar() %>%
+    #addMarkers(-83.005, 24.76, icon = myicon) %>%
+    fitBounds(lng1=-83.05, lat=24.7, lng2=-82.72, lat2=24.6)
+
+map
+#addControl(map, position="topleft", 
+#          html = '<img src="/Data/North-Arrow.png">')
   
 ```
-<font size="2"> **Figure 1:** Map of study sites in Dry Tortugas National Park area </font>
+
+<font size="2"> **Figure 1:** Study sites and depths in Dry Tortugas National Park area </font>
 
 -----
 
@@ -208,7 +232,8 @@ Three years of temperature measurements were retrieved and processed from all 4 
 
 # 2. Bind all data and order depth  
   str_all<-rbind(str01, str05, str15, str25)
-  str_all$Depth<-factor(str_all$Depth, levels = c("0m", "1m", "5m", "15m", "25m"))
+  str_all$Depth<-factor(str_all$Depth, levels = c("-1m", "0m", "1m", "5m", "15m", "25m"))
+  summary(str_all$Depth)
 
 ```
 
@@ -246,8 +271,9 @@ plot<-ggplot(data = str_all) +
         legend.title = element_blank(),
         #legend.box.background = element_rect(colour = "black")
         ) +
-   scale_color_brewer(palette="Blues")+
-      
+  #scale_color_brewer(palette="Blues")+
+  scale_color_manual(values=c("#9ECAE1", "#6BAED6", "#3182BD", "#08519C"))+
+
   scale_x_datetime(breaks = breaks_width(xWidth),
                    labels = date_format("%m/%Y"),
                    limits = c(globalMinDate, globalMaxDate),
@@ -271,10 +297,11 @@ box <- ggplot(data = str_all) +
       
   scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp+1.5),
                      breaks = seq(0,50,2.5))+
-      scale_fill_brewer(palette="Blues")
+  #scale_fill_brewer(palette="Blues")
+  scale_fill_manual(values=c("#9ECAE1", "#6BAED6", "#3182BD", "#08519C"))
     
 Figure2 <- ggarrange(plot, box, widths = c(8/10, 2/10))
- 
+
 ```
 
 
@@ -284,22 +311,44 @@ Figure2
 
 <font size="2"> **Figure 2:** Temperature conditions at four sites in the Dry Tortugas representing a depth gradient: Pulaski Shoal Lighthouse (1m) White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m). Data were collected from November 2018 to June 2021, with the exception of the 25m STR that recorded until February 7th 2020. </font>
  
-```{r, echo = F}
+```{r, echo = F, include=F}
 #Temp.Depth <- plyr::ddply (str_all, .(Depth), summarise,
 #                Tmin = min (Temperature, na.rm = F), 
 #                Tmax = max (Temperature, na.rm = F),
 #                Tmean = mean (Temperature, na.rm = F), 
 #                Tsd = sd (Temperature, na.rm = F))
 #kable(as.data.frame(Temp.Depth, format = "markdown"))
+
+head(str_all)
+str_all_W<-as.data.frame(spread(str_all, key = Depth, 
+                  value = Temperature))
+head(str_all_W)
+str_all_W <- str_all_W[complete.cases(str_all_W), ]
+str_all_W$m25_m1<-str_all_W$`25m`-str_all_W$`1m`
+str_all_W$m25_m5<-str_all_W$`25m`-str_all_W$`5m`
+str_all_W$m25_m15<-str_all_W$`25m`-str_all_W$`15m`
+str_all_W$MonthYear<-format(str_all_W$UTCDateTime, format="%Y-%m")
+
+str_all_W_min <- str_all_W %>%
+  group_by(MonthYear) %>%
+  summarise(
+    Mean_1 = mean(m25_m1, na.rm = T),
+    Min_1 = min(m25_m1, na.rm = T),
+    Mean_15 = mean(m25_m15, na.rm = T),
+    Min_15 = min(m25_m15, na.rm = T)
+  ) %>%
+  arrange(MonthYear)
+str_all_W_min
+
 ```
 
-Temperature values were similar among the 1m, 5m and 15m depths with the lowest temperatures recorded during February 2021 (20.8, 20.7, and 19.9 $^\circ$C, respectively) and the the higest temperatures during the summer of 2019 and 2020 (31.7, 31.6, and 31.5 $^\circ$C, respectively). Though the 25m STR stopped recording on February 7, 2020, it detected consistent temperature stratification at this site during the summers when it was active. Temperatures were XX to YY $^\circ$C below the values at other depths. 
+Temperature values were similar among the 1m, 5m and 15m depths with the lowest temperatures recorded during February 2021 (20.8, 20.7, and 19.9 $^\circ$C, respectively) and the the higest temperatures during the summer of 2019 and 2020 (31.7, 31.6, and 31.5 $^\circ$C, respectively). Though the 25m STR stopped recording on February 7, 2020, it detected consistent temperature stratification at this site during the summers when it was active. Temperatures at 25m were on average 5-6$^\circ$C lower during summer 2018, and 1$^\circ$C lower during summer 2019, compared with the values at other depths (Fig. 2). 
 
 -----
 
 #### Diurnal Suite Deployment
 
-At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite that monitored pH, temperature, light and current speed. The SeaFET pH logger, EcoPAR and Tiltmeter collected measurements at 5-minute intervals.
+At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite that monitored pH, temperature, light and current speed (Fig. 3). The SeaFET pH logger, EcoPAR and Tiltmeter collected measurements at 5-minute intervals.
 
 ```{r pH_and_temp_data, include=FALSE}
 
@@ -483,14 +532,12 @@ Light_Current<-ggplot(data = light) +
 ```{r Diurnal_Suite_Plot, echo=FALSE, warning=FALSE, fig.width = 9.5,fig.height = 7}
 Legend1<-pH_Temp_Plot + theme(legend.position = "bottom",
                               legend.title = element_blank())
-                              
   Legend1<-get_legend(Legend1)
   #ggdraw(Legend1)
 
 Legend2<-Light_Current + theme(legend.position = "bottom",
                               legend.title = element_blank())
   Legend2<-get_legend(Legend2)
-
   #ggdraw(Legend2)
   
 ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
@@ -501,22 +548,16 @@ ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
                  ncol = 1, rel_heights=c(1, 0.1)))
 ```
 
-
-```{r Diurnal_SuPlotv1, echo=FALSE, warning=FALSE, fig.width = 9,fig.height = 7}
-#ggarrange(pH_Temp_Plot, Light_Current, ncol=1)
-```
-
 <font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 25th to 28th. Top panel: pH and temperature from SeaFET. Bottom panel: Photosynthetically Available Radiation (PAR) and current speed from EcoPAR and Tiltmeter. Grey blocks denote night time throughout sequence of the plot. Instruments measured parameters every 5 minutes. </font>
 
 
 As part of the diurnal suite, discrete water samples were collected at three-hour intervals (n=24) using Subsurface Automatic Samplers (SAS). These samples will be analyzed for Total Alkalinity (TA), Dissolved Inorganic Carbon (DIC), and Spectrophotometric pH (SpecpH). Using these metrics we can get the calculated values for pCO2 and aragonite saturation state. For more information on SAS vist https://www.coral.noaa.gov/accrete/sas/
 
-```{r SASs, echo=FALSE, out.width = '50%', fig.cap="Submergered Automated Samplers (SAS) deployed to collect water samples every 3 hours", fig.align='center'}
+```{r SASs, echo=FALSE, out.width = '50%', fig.cap="Submered Automated Samplers (SAS) deployed to collect water samples every 3 hours", fig.align='center'}
 
 knitr::include_graphics("Data/SAS.jpg")
 
 ```
-
 
 
 -----
@@ -579,26 +620,29 @@ http://www.aoml.noaa.gov/
 
 These efforts were jointly funded by NOAA's CRCP and OAP. We would like to thank the National Park Service and Florida Keys National Marine Sanctuary for permitting support and the ANGARI Foundation for field support.
 
-```{r fundingsources, include=FALSE, fig.align='left', out.width='20%'}
-F1 <- ggdraw() + draw_image("Logos/CRCP.jpeg", scale = 0.8)
-F2 <- ggdraw() + draw_image("Logos/OAP.png", scale = 1.2)
 
-funding<-plot_grid(F1, F2)
+```{r fundingsources, include=FALSE, fig.align='left', out.width='35%'}
+F1 <- ggdraw() + draw_image("Logos/CRCP.jpeg", scale = 0.4)
+#F_space<-ggplot() +
+#    theme_void() +
+#    geom_text(aes(0,0,label='')) +
+#    xlab(NULL)
+F2 <- ggdraw() + draw_image("Logos/OAP.png", scale = 1)
+
+funding<-plot_grid(F1, F2, nrow=1, rel_widths = c(2,2))
+
 ```
 
-```{r funding, echo=FALSE, fig.align='left', out.width='20%'}
+```{r funding, echo=FALSE, fig.align='left', out.width='30%'}
 funding
 ```
 
-
 ### Our Team
 
-```{r team, echo=FALSE, out.width = '50%', fig.align='left'}
+```{r team, echo=FALSE, out.width = '50%', fig.align='center'}
 knitr::include_graphics("Data/Fieldteam.jpg")
 ```
 
 **Field team members**: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel
 
 **Additional lab members involved with NCRMP**: Ian Enochs, Benjamin Chomitz, Albert Boyd, Mike Jankulak, Ana Palacio
-
-
