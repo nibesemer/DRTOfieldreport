@@ -93,7 +93,7 @@ The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts th
 
 ### Data collection
 
-* Subsurface **temperature** recorders (STRs) were recovered at all 4 study sites, accounting for 1.1 million temperature observations:
+* Subsurface **temperature** recorders (STRs) were recovered and redeployed at all 4 study sites, accounting for 1.1 million temperature observations:
   - Pulaski Shoal (1m): 311,609 observations 
   - White Shoal (5m): 311,213 observations 
   - Bird Key Reef (15m): 311,560 observations 
@@ -104,13 +104,13 @@ The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts th
   - **Current**: 880 observations
   - **pH**: 879 observations
   - **Light**: 876 observations
-  
+  - **Carbonate Chemistry**: 24 samples collected
   
 * Additionally, changes in benthic cover and carbonate production were monitored at Bird Key Reef by recording:
-  - **Bioerosion**: 5 Bioerosion Monitoring Units (BMUs), 
-  - **Calcification**: 5 Calcification Accretions Units (CAUs)
+  - **Bioerosion**: 5 Bioerosion Monitoring Units (BMUs) collected, 10 redeployed 
+  - **Calcification**: 5 Calcification Accretions Units (CAUs) collected, 5 redeployed
   - **Benthic cover**: 6 landscape mosaics
-  - **Carbonate budget surveys**: 6 BL BLA BLA
+  - **Carbonate budget surveys**: Benthic cover, sponge, urchin and parrotfish surveys completed at 6 transects
 
 <br>
 
@@ -229,7 +229,7 @@ Three years of temperature measurements were retrieved and processed from all 4 
 ```
 
 
-```{r plot STR temperature, echo=FALSE, fig.width = 8, fig.height = 4}
+```{r plot STR temperature, echo=FALSE, fig.width = 9.5, fig.height = 4}
 
 plot<-ggplot(data = str_all) +
       geom_line(aes(x = ymd_hms(UTCDateTime), 
@@ -255,7 +255,9 @@ plot<-ggplot(data = str_all) +
   scale_y_continuous(limits = c(globalMinTemp, globalMaxTemp+1.5),
                      name=(expression(paste("Temperature (", 
                                             degree, "C)"))),
-                     breaks = seq(0,50,2.5)) 
+                     breaks = seq(0,50,2.5)) +
+  guides(colour = guide_legend(override.aes = list(size = 8)))+
+  theme(legend.key=element_rect(fill=NA))
       
     
 box <- ggplot(data = str_all) +
@@ -276,7 +278,7 @@ Figure2 <- ggarrange(plot, box, widths = c(8/10, 2/10))
 ```
 
 
-```{r, echo = F, fig.width = 8, fig.height = 4}
+```{r, echo = F, fig.width = 9.5, fig.height = 4}
 Figure2
 ```
 
@@ -291,13 +293,13 @@ Figure2
 #kable(as.data.frame(Temp.Depth, format = "markdown"))
 ```
 
-Temperature values were similar among the 1m, 5m and 15m depths with the lowest temperatures recorded during February 2021 (20.8, 20.7, and 19.9 $^\circ$C, respectively) and the the higest temperatures during the summer of 2019 and 2020 (31.7, 31.6, and 31.5 $^\circ$C, respectively). The 25m STR detected consistent temperature stratification at this site during the summers when it was active. Temperatures were XX to YY $^\circ$C below the values at other depths. 
+Temperature values were similar among the 1m, 5m and 15m depths with the lowest temperatures recorded during February 2021 (20.8, 20.7, and 19.9 $^\circ$C, respectively) and the the higest temperatures during the summer of 2019 and 2020 (31.7, 31.6, and 31.5 $^\circ$C, respectively). Though the 25m STR stopped recording on February 7, 2020, it detected consistent temperature stratification at this site during the summers when it was active. Temperatures were XX to YY $^\circ$C below the values at other depths. 
 
 -----
 
 #### Diurnal Suite Deployment
 
-At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite that monitored pH, temperature, light and current speed. SeaFET pH logger, Tiltmeter and EcoPAR collected measurements at 5-minute intervals.
+At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite that monitored pH, temperature, light and current speed. The SeaFET pH logger, EcoPAR and Tiltmeter collected measurements at 5-minute intervals.
 
 ```{r pH_and_temp_data, include=FALSE}
 
@@ -364,7 +366,7 @@ fileAny <- "Data/2102061_DRTO-2021-06_(0)_Current.csv"
 ```
 
 
-```{r ph and temp combined v3,echo=FALSE, warning=FALSE,fig.width = 8, fig.height = 3.5}
+```{r ph and temp combined v3,echo=FALSE, warning=FALSE,fig.width = 9.5, fig.height = 3.5}
 
 #pH and temp combined 
 
@@ -388,16 +390,16 @@ pH_Temp_Plot<-ggplot(data = pH) +
                          by = "day", length.out = 4),
           y = 7.985)+ 
   # Data
-  geom_line(aes(x=DateTime, y=pH, color = "pH"),
-            size=0.8) +
   geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
+            size=0.8) +
+  geom_line(aes(x=DateTime, y=pH, color = "pH"),
             size=0.8) +
   scale_color_manual(values=c("black", "red"))+
   # Axes
   scale_y_continuous(limits = c(7.925,7.985),
-                     name="pH \n (Total scale)",
+                     name="pH (Total scale)",
                      sec.axis = sec_axis(~(.-4.8371)/0.1099,
-                                name="Temperature \n (\u00B0C)"))  +
+                                name="Temperature (\u00B0C)"))  +
   scale_x_datetime(name="Date and Time (EDT)",
                   date_breaks = "6 hour",
                   #date_minor_breaks = "1 hour",
@@ -414,11 +416,15 @@ pH_Temp_Plot<-ggplot(data = pH) +
         legend.position = "none",
         panel.grid = element_blank(),
         axis.title.x=element_blank(), 
-        axis.text.x=element_blank())
+        axis.text.x=element_blank())+
+  guides(colour = guide_legend(override.aes = list(size = 8)))+
+  theme(legend.key=element_rect(fill=NA))+ 
+  theme(axis.title.y.right = element_text(vjust = .75))
+
  
 ```
 
-```{r light and current compbined,echo=FALSE, warning=FALSE,fig.width = 8, fig.height = 3.5}
+```{r light and current compbined,echo=FALSE, warning=FALSE,fig.width = 9.5, fig.height = 3.5}
 
 # Scale current
 scaleFactor <- max(light$PAR) / max(current$ws)
@@ -437,17 +443,17 @@ Light_Current<-ggplot(data = light) +
           fill="grey", alpha=0.5) +
   
   # Data
-  geom_line(aes(x=DateTime, y=PAR, color = "PAR"),
-            size=0.8) +
   geom_line(data= current, aes(x=date, y=ws.adj, color = "Current Speed"),
+            size=0.8) +
+  geom_line(aes(x=DateTime, y=PAR, color = "PAR"),
             size=0.8) +
   scale_color_manual(values=c("navyblue", "goldenrod1"))+
   
   # Axes
   scale_y_continuous(limits = c(0,455), 
-                     name=expression(atop(paste("PAR\n (",mu,"mol photons m"^-2,"s"^-1,")"))),
+                     name=expression(paste("PAR (",mu,"mol photons m"^-2,"s"^-1,")")),
                      sec.axis = sec_axis(~./scaleFactor, 
-                                name="Current Speed \n (cm/s)",
+                                name="Current Speed (cm/s)",
                                 breaks = seq(1,12,2)))+
                        
   scale_x_datetime(name="Date and Time (EDT)",
@@ -467,12 +473,14 @@ Light_Current<-ggplot(data = light) +
           plot.margin = unit(c(0.5,1,0.1,1), "lines"),
           legend.position = "none",
           panel.grid = element_blank()
-        )
+        )+
+  guides(colour = guide_legend(override.aes = list(size = 8)))+
+  theme(legend.key=element_rect(fill=NA))
 
 ```
 
 
-```{r Diurnal_Suite_Plot, echo=FALSE, warning=FALSE, fig.width = 8,fig.height = 7}
+```{r Diurnal_Suite_Plot, echo=FALSE, warning=FALSE, fig.width = 9.5,fig.height = 7}
 Legend1<-pH_Temp_Plot + theme(legend.position = "bottom",
                               legend.title = element_blank())
                               
@@ -494,16 +502,21 @@ ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
 ```
 
 
-```{r Diurnal_SuPlotv1, echo=FALSE, warning=FALSE, fig.width = 8,fig.height = 7}
+```{r Diurnal_SuPlotv1, echo=FALSE, warning=FALSE, fig.width = 9,fig.height = 7}
 #ggarrange(pH_Temp_Plot, Light_Current, ncol=1)
 ```
 
-<font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 25th to 28th. Top panel: pH and temperature. Bottom panel: current speed and Photosynthetically Available Radiation (PAR). Grey blocks denote night time throughout sequence of plot. Instruments measured parameters every 5 minutes. </font>
+<font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 25th to 28th. Top panel: pH and temperature from SeaFET. Bottom panel: Photosynthetically Available Radiation (PAR) and current speed from EcoPAR and Tiltmeter. Grey blocks denote night time throughout sequence of the plot. Instruments measured parameters every 5 minutes. </font>
 
 
-As part of the diurnal suite, discrete water samples were collected at three-hour intervals (n=24) using Subsurface Automatic Samplers (SAS). THIS SAMPLES WILL BE ANALIZED TO ASSESS BLA BLA BLA
+As part of the diurnal suite, discrete water samples were collected at three-hour intervals (n=24) using Subsurface Automatic Samplers (SAS). These samples will be analyzed for Total Alkalinity (TA), Dissolved Inorganic Carbon (DIC), and Spectrophotometric pH (SpecpH). Using these metrics we can get the calculated values for pCO2 and aragonite saturation state. For more information on SAS vist https://www.coral.noaa.gov/accrete/sas/
 
-MAYBE ADD A PICTURE IF THE SAS AND OR LINK TO SAS PAGE
+```{r SASs, echo=FALSE, out.width = '50%', fig.cap="Submergered Automated Samplers (SAS) deployed to collect water samples every 3 hours", fig.align='center'}
+
+knitr::include_graphics("Data/SAS.jpg")
+
+```
+
 
 
 -----
@@ -512,15 +525,20 @@ MAYBE ADD A PICTURE IF THE SAS AND OR LINK TO SAS PAGE
 
 * **Calcification Accretion Units (CAUs)** and **Bioerosion Monitoring Units (BMUs)** were collected and redeployed for the next sampling cycle. CAUs are processed by the Pacific Climate group and the data will be available within a year. BMUs will be dried and cleaned using a hydrogen peroxide solution. These samples will be weighed and scanned using a Macro CT scanner and then compared to their pre-scans to quantify bioerosion. Data will be available in a year. Please reference previous datasets for more information.
 
-```{r BMUs, echo=FALSE, out.width = '50%', fig.cap="CAU and BMU pair after being deployed for 3 years", fig.align='center'}
+```{r BMUs, echo=FALSE, out.width = '50%', fig.cap="CAU and BMU pair before retreval after being deployed for 3 years. CAUs are 2 parallel PVC plates to quantify settled accretors. BMU is mounted coral skeleton installed at the base of the metal stake and has been encrusted.", fig.align='center'}
 
 knitr::include_graphics("Data/CAUBMU.jpg")
 
 ```
 
-<font size="2"> **Figure 4:** CAU and BMU pair after being deployed for 3 years WHAT IS ON THE TOP AND BOTTOM? DESCROBE THE PICTURE BETTER</font>
-
 * **Landscape mosaics** (n=6) and **carbonate budget** surveys (n=6) were completed to monitor changes in benthic cover and carbonate production
+
+```{r mosaic, echo=FALSE, out.width = '50%', fig.cap="Scientist Nathan Formel collects images to create the orthorectified landscape mosaics", fig.align='center'}
+
+knitr::include_graphics("Data/natemosaic.jpg")
+
+```
+
 
 -----
 
@@ -554,7 +572,7 @@ http://www.aoml.noaa.gov/
 
 [Florida Coral Reef Status Report 2020](https://www.coris.noaa.gov/monitoring/status_report/docs/FL_508_compliant.pdf)
 
-
+[National Coral Reef Status Report 2020](https://repository.library.noaa.gov/view/noaa/27295)
 
 ### Acknowledgements
 
@@ -580,4 +598,7 @@ knitr::include_graphics("Data/Fieldteam.jpg")
 ```
 
 **Field team members**: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel
+
+**Additional lab members involved with NCRMP**: Ian Enochs, Benjamin Chomitz, Albert Boyd, Mike Jankulak, Ana Palacio
+
 
