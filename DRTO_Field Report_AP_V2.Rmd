@@ -7,6 +7,8 @@ output:
   pdf_document: default
   always_allow_html: true
   word_document: default
+editor_options: 
+  chunk_output_type: console
 ---
 
 <h1 style="color: darkblue;font size=24, align=center" > National Coral Reef Monitoring Program</h1> 
@@ -65,7 +67,7 @@ National Oceanic Atmospheric Administration</h4>
 <br>
 
 <h5 style="font size=6">
-N. Besemer, A. Palacio, M. Jankulak, G. Kolodziej, I. Enochs - July 2021
+N. Besemer, A. Palacio, M. Jankulak, I. Enochs - October 2024
 </h5>
 
 ```{r logos, echo=FALSE, fig.align='left', out.width='20%'}
@@ -86,6 +88,7 @@ The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts th
 ### Expedition summary
 
 * The most recent NCRMP Atlantic climate monitoring took place at Dry Tortugas National Park from June 24th to June 29th 2021
+
 * Four different sites were visited by 5 team members completing a total of 63 dives. 
 * These sites represent temporal‐resolution monitoring with moored instruments at fixed time‐series which are placed on depth gradient to assess how vertical structure affects reef status and trends.
 
@@ -120,10 +123,10 @@ The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts th
 # Add info from the sampling stations
 stations <- as.data.frame(read.csv(textConnection("
 Site,	Lat,	Long,	Depth
-Pulaski Shoal,	24.693342,	-82.773034,1m
-White Shoal,	24.641420,	-82.896200,5m
-Bird Key Reef,	24.611310,	-82.870500,15m
-Black Coral Rock,	24.699300,	-83.00218,25m")))
+Pulaski Shoal,	24.693342,	-82.773034, 1m
+White Shoal,	24.641420,	-82.896200, 5m
+Bird Key Reef,	24.611310,	-82.870500, 15m
+Black Coral Rock,	24.699300,	-83.00218, 25m")))
 
 stations$Site<-as.character(stations$Site)
 stations$Depth<-as.character(stations$Depth)
@@ -206,43 +209,59 @@ Three years of temperature measurements were retrieved and processed from all 4 
 
 ```{r get Temp, include=FALSE}
 
-# 1. Import all processed temperature data and add depht: 
+# 1. Import all processed temperature data and add depth: 
 
-## This code allow us to chose each file "manually". We can get the file names automatically (as in Mike's code), both have advantages and disadvantages. 
+read_plus <- function(flnm) {
+  read_csv(flnm ) %>%
+    mutate(filename = flnm)
+}
 
-  # 1m data
-  str01 <- read_csv('Data/DRTOSTRs/DRTO_west_01m_sn7774_tag3094_pulaski-shoal_2018-07-11_2021-06-27_processed.csv', col_types = cols())
-  str01$Depth<-"1m"
-  # head(str01)
-  
-  # 5m data
-  str05 <- read_csv('Data/DRTOSTRs/DRTO_west_05m_sn8621_tag3093_white-shoal_2018-07-11_2021-06-26_processed.csv', col_types = cols())
-  str05$Depth<-"5m"
-  #head(str05)
-  
-  # 15m data
-  str15 <- read_csv('Data/DRTOSTRs/DRTO_west_15m_sn7769_tag3092_bird-key-reef_2018-07-11_2021-06-27_processed.csv',col_types = cols())
-  str15$Depth<-"15m"
-  #head(str15)
-  
-  # 20m data
-  str25 <- read_csv('Data/DRTOSTRs/DRTO_west_25m_sn7784_tag3091_black-coral-rock_2018-07-12_2020-02-07_processed.csv',col_types = cols())
-  str25$Depth<-"25m"
-  #head(str25)
+tbl_with_sources <-
+    list.files(pattern = "*.csv", 
+               full.names = T) %>% 
+    map_df(~read_plus(.))
 
-# 2. Bind all data and order depth  
-  str_all<-rbind(str01, str05, str15, str25)
-  str_all$Depth<-factor(str_all$Depth, levels = c("-1m", "0m", "1m", "5m", "15m", "25m"))
-  summary(str_all$Depth)
+STR_all <-
+    list.files(path = "Data/STRs",
+               pattern = "*.csv", 
+               full.names = T, 
+               recursive = TRUE) %>% 
+    map_df(~read_plus(.)) 
+    #head(STR_all)
 
+STR_all <- STR_all %>%
+      mutate_at("filename", str_replace, "Data/STRs/DRTO_", "")
+
+colmn<-c("Transect", "Depth", "SN", "Tag", "Location")
+STR_all <-
+  tidyr::separate(
+    data = STR_all,
+    col = filename,
+    sep = "_",
+    into = colmn,
+    remove = TRUE
+  )
+
+## Formatting
+
+STR_all$Transect[STR_all$Transect=="west"]<-"West"
+
+STR_all$Depth[STR_all$Depth=="01m"]<-"1m"
+STR_all$Depth[STR_all$Depth=="05m"]<-"5m"
+
+STR_all$Depth<-factor(STR_all$Depth, 
+                levels = c("1m", "5m", "15m","25m"))
+summary(STR_all$Depth)
+
+summary(STR_all$Transect)
 ```
 
 ```{r Tempvariables, include=FALSE}
 # 3. Define limits for temperature and time (if we want to follow Mike's to automate)
-  globalMinDate <- min(str_all$UTCDateTime)
-  globalMinTemp <- min(str_all$Temperature)
-  globalMaxDate <- max(str_all$UTCDateTime)
-  globalMaxTemp <- max(str_all$Temperature)
+  globalMinDate <- min(STR_all$UTCDateTime)
+  globalMinTemp <- min(STR_all$Temperature)
+  globalMaxDate <- max(STR_all$UTCDateTime)
+  globalMaxTemp <- max(STR_all$Temperature)
 
 # 4. Define breaks in the x axis
   if ((globalMaxDate-globalMinDate) > 365.25) {
@@ -256,10 +275,10 @@ Three years of temperature measurements were retrieved and processed from all 4 
 
 ```{r plot STR temperature, echo=FALSE, fig.width = 9.5, fig.height = 4}
 
-plot<-ggplot(data = str_all) +
+plot<-ggplot(data = STR_all) +
       geom_line(aes(x = ymd_hms(UTCDateTime), 
                     y = Temperature, colour=Depth),
-                size=0.3) +
+                linewidth=0.3) +
   
   theme_bw() +
   theme(#axis.title.x = element_blank(),
@@ -286,7 +305,7 @@ plot<-ggplot(data = str_all) +
   theme(legend.key=element_rect(fill=NA))
       
     
-box <- ggplot(data = str_all) +
+box <- ggplot(data = STR_all) +
        geom_boxplot(aes(x = Depth, y = Temperature, fill=Depth)) +
        theme_bw() +
        theme(panel.grid = element_blank(),
@@ -312,33 +331,28 @@ Figure2
 <font size="2"> **Figure 2:** Temperature conditions at four sites in the Dry Tortugas representing a depth gradient: Pulaski Shoal Lighthouse (1m) White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m). Data were collected from November 2018 to June 2021, with the exception of the 25m STR that recorded until February 7th 2020. </font>
  
 ```{r, echo = F, include=F}
-#Temp.Depth <- plyr::ddply (str_all, .(Depth), summarise,
-#                Tmin = min (Temperature, na.rm = F), 
-#                Tmax = max (Temperature, na.rm = F),
-#                Tmean = mean (Temperature, na.rm = F), 
-#                Tsd = sd (Temperature, na.rm = F))
-#kable(as.data.frame(Temp.Depth, format = "markdown"))
+STR_all$MonthYear<-format(STR_all$UTCDateTime, format="%Y-%m")
+STR_all$Month<-format(STR_all$UTCDateTime, format="%m")
 
-head(str_all)
-str_all_W<-as.data.frame(spread(str_all, key = Depth, 
-                  value = Temperature))
-head(str_all_W)
-str_all_W <- str_all_W[complete.cases(str_all_W), ]
-str_all_W$m25_m1<-str_all_W$`25m`-str_all_W$`1m`
-str_all_W$m25_m5<-str_all_W$`25m`-str_all_W$`5m`
-str_all_W$m25_m15<-str_all_W$`25m`-str_all_W$`15m`
-str_all_W$MonthYear<-format(str_all_W$UTCDateTime, format="%Y-%m")
-
-str_all_W_min <- str_all_W %>%
-  group_by(MonthYear) %>%
+str_summary <- STR_all %>%
+  group_by(MonthYear, Depth) %>%
   summarise(
-    Mean_1 = mean(m25_m1, na.rm = T),
-    Min_1 = min(m25_m1, na.rm = T),
-    Mean_15 = mean(m25_m15, na.rm = T),
-    Min_15 = min(m25_m15, na.rm = T)
+    MeanT = mean(Temperature, na.rm = T),
+    MinT = min(Temperature, na.rm = T),
+    MaxT = max(Temperature, na.rm = T) 
   ) %>%
   arrange(MonthYear)
-str_all_W_min
+str_summary
+
+str_summary_m <- STR_all %>%
+  group_by(Month, Depth) %>%
+  summarise(
+    MeanT = mean(Temperature, na.rm = T),
+    MinT = min(Temperature, na.rm = T),
+    MaxT = max(Temperature, na.rm = T) 
+  ) %>%
+  arrange(Month)
+str_summary_m
 
 ```
 
@@ -353,63 +367,55 @@ At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suit
 ```{r pH_and_temp_data, include=FALSE}
 
 # 1.Get the pH data
-pH <- read_csv('Data/DRTO_SeaFET07062021.csv',col_types = cols()) %>%
+pH <- read_csv('Data/DRTO SAMI_Ana.csv',col_types = cols()) %>%
     select(DateTime = `DateTime (UTC+00:00)`,
-           pH = `Internal pH (pH)`,
-           Temperature = `pH Temperature (Celsius)`) %>%
-    mutate(DateTime = parse_date_time(DateTime, '%m/%d/%Y %H:%M')) %>%
+           pH = `SAMIpH`,
+           Temperature = `TempC`) %>%
+    #mutate(DateTime = parse_date_time(DateTime, '%m/%d/%Y %H:%M:%S')) %>%
     #manual start/stop time of monitoring
-    filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
-         DateTime <= as.POSIXct('2021-06-28 19:45:00', tz='UTC')) %>%
+    filter(DateTime >= as.POSIXct('2024-06-23 18:00:00', tz='UTC') &
+         DateTime <= as.POSIXct('2024-06-27 11:45:00', tz='UTC')) %>%
     mutate(DateTime = with_tz(DateTime, 'America/New_York'))
 ```
 
 
 ```{r Current_data, include=FALSE}
-# There is also /DRTO_SeaFET07062021(1).csv, what isthe difference?
 
 # 2. Get current data
-fileAny <- "Data/2102061_DRTO-2021-06_(0)_Current.csv"
-  # Are there going to be more than one current file? 
-  current <- read.csv(fileAny, header = TRUE)
-  summary(current)
 
-# hardcoded limits for this DRTO file are
-# ymd_hms("2021/06/25 18:30:00") and ymd_hms("2021/06/28 19:45:00")
-# (future enhancement: incorporate Hannah Barkley's dataset trimming code; also, eliminate all the hardcoding below and calculate from data)
-
-  current$date = ymd_hms(paste0(current$Date, current$Time), 
-                         tz = "UTC")
-  current <- current[, c("date","Speed..cm.s.","Heading..degrees.")]
-  colnames(current) <- c("date","ws","wd")
-  #manual start/stop time of monitoring
-  current$DateTime<-NA
-  current <- subset(current, date >= ymd_hms("2021/06/25 18:30:00") &
-                      date <= ymd_hms("2021/06/28 19:45:00"))
-  current$DateTime <- lubridate::with_tz(current$date,
-                                         "America/New_York")
-
+#current <- read.csv('Data/tiltmeter-sn2102061-drto-suite.csv')
+current <- read_csv('Data/tiltmeter-sn2102061-drto-suite.csv', col_types = cols()) %>%
+    select(DateTime = `DateTime (UTC)`,
+           ws = `Speed (cm/s)`,
+           wd = `Heading (degrees)`, 
+           Temperature = `Temperature (C)`
+           ) %>%
+    #manual start/stop time of monitoring
+    #filter(DateTime >= as.POSIXct('2024-06-23 13:30:00', tz='UTC') &
+    #       DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
+    mutate(DateTime = with_tz(DateTime, 'America/New_York'))
+head(current)
 ```
 
 
 ```{r PAR_data, include = FALSE}
 
 # 3. Get the PAR data  
-  light <- read_csv('Data/DRTO_EcoPAR07062021.csv',
+  light <- read_csv('Data/ecopar-sn0392-drto-suite.csv',
                     col_types = cols()) %>%
           mutate(DateTime = mdy_hms(paste(Date, Time))) %>%
-          select(DateTime, `PAR (CALC)`) %>%
+          select(DateTime, `PAR (calc)`) %>%
           drop_na() %>%
           mutate(interval = 0:(nrow(.)-1) %/% 10) %>%
           group_by(interval) %>%
           summarise(DateTime = mean(DateTime),
-                    PAR = mean(`PAR (CALC)`),
-                    sd = sd(`PAR (CALC)`)) %>%
-        select(-interval) %>%
+                    PAR = mean(`PAR (calc)`),
+                    sd = sd(`PAR (calc)`)) %>%
+        select(-interval)%>%
 
   #manual start/stop time of monitoring
-  filter(DateTime >= as.POSIXct('2021-06-25 18:35:00', tz='UTC') &
-         DateTime <= as.POSIXct('2021-06-28 19:45:00', tz='UTC')) %>%
+    #filter(DateTime >= as.POSIXct('2024-06-23 13:30:00', tz='UTC') &
+    #       DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
   mutate(DateTime = with_tz(DateTime, 'America/New_York'))
 
 ```
@@ -422,22 +428,21 @@ fileAny <- "Data/2102061_DRTO-2021-06_(0)_Current.csv"
 # Scale Temperature 
 pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
 
-
 # Plot
 pH_Temp_Plot<-ggplot(data = pH) +
   # Day/Night
-  annotate("rect",
-          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
-                         by = "day", length.out = 3),
-          xmax = seq.POSIXt(as.POSIXct('2021-06-26 05:45:00', tz='EST'),
-                         by = "day", length.out = 3),
-          ymin = -Inf, ymax = Inf,
-          fill="grey", alpha=0.5) +
-   annotate("text",
-          label = paste("Jun", 25:28),
-          x = seq.POSIXt(as.POSIXct('2021-06-25 15:00:00', tz='EST'),
-                         by = "day", length.out = 4),
-          y = 7.985)+ 
+  # annotate("rect",
+  #         xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
+  #                        by = "day", length.out = 3),
+  #         xmax = seq.POSIXt(as.POSIXct('2021-06-26 05:45:00', tz='EST'),
+  #                        by = "day", length.out = 3),
+  #         ymin = -Inf, ymax = Inf,
+  #         fill="grey", alpha=0.5) +
+  #  annotate("text",
+  #         label = paste("Jun", 25:28),
+  #         x = seq.POSIXt(as.POSIXct('2021-06-25 15:00:00', tz='EST'),
+  #                        by = "day", length.out = 4),
+  #         y = 7.985)+ 
   # Data
   geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
             size=0.8) +
@@ -445,7 +450,7 @@ pH_Temp_Plot<-ggplot(data = pH) +
             size=0.8) +
   scale_color_manual(values=c("black", "red"))+
   # Axes
-  scale_y_continuous(limits = c(7.925,7.985),
+  scale_y_continuous(#limits = c(7.925, 7.985),
                      name="pH (Total scale)",
                      sec.axis = sec_axis(~(.-4.8371)/0.1099,
                                 name="Temperature (\u00B0C)"))  +
@@ -454,8 +459,8 @@ pH_Temp_Plot<-ggplot(data = pH) +
                   #date_minor_breaks = "1 hour",
                   labels = date_format("%m/%d\n%H:%M",
                                         tz="America/New_York"))+
-  coord_cartesian(ylim = c(7.925,7.985),
-                  xlim = c(min(pH$DateTime),max(pH$DateTime)),
+  coord_cartesian(#ylim = c(7.925,7.985),
+                  #xlim = c(min(pH$DateTime),max(pH$DateTime)),
                   clip = 'off',
                   expand = T) +
   #Aesthetics
@@ -469,7 +474,7 @@ pH_Temp_Plot<-ggplot(data = pH) +
   guides(colour = guide_legend(override.aes = list(size = 8)))+
   theme(legend.key=element_rect(fill=NA))+ 
   theme(axis.title.y.right = element_text(vjust = .75))
-
+pH_Temp_Plot
  
 ```
 
