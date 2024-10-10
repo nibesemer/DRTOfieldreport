@@ -374,10 +374,29 @@ pH <- read_csv('Data/DRTO SAMI_Ana.csv',col_types = cols()) %>%
     #mutate(DateTime = parse_date_time(DateTime, '%m/%d/%Y %H:%M:%S')) %>%
     #manual start/stop time of monitoring
     filter(DateTime >= as.POSIXct('2024-06-23 18:00:00', tz='UTC') &
-         DateTime <= as.POSIXct('2024-06-27 11:45:00', tz='UTC')) %>%
+         DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
     mutate(DateTime = with_tz(DateTime, 'America/New_York'))
 ```
 
+
+```{r pH_SAS_data, include=FALSE}
+
+# 1.Get the pH data
+SAS.data <- read_csv('Data/2024-drto-sas-data.csv',col_types = cols()) %>%
+              mutate(DateTime_EDT = ymd_hms(paste(collected_date, collected_time)), 
+                     tz = 'America/New_York') %>%
+              select(DateTime_EDT, 
+                     Temperature=`Temperature_C`, 
+                     pH_measured, 
+                     pH_calculated) %>%
+              mutate(DateTime_EDT = force_tz(DateTime_EDT, tzone = "America/New_York")) %>%
+    #mutate(DateTime = parse_date_time(DateTime, '%m/%d/%Y %H:%M:%S')) %>%
+    #manual start/stop time of monitoring
+    mutate(DateTime = with_tz(DateTime_EDT, tz='UTC'))%>%
+    filter(DateTime >= as.POSIXct('2024-06-23 18:00:00', tz='UTC') &
+           DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) 
+    
+```
 
 ```{r Current_data, include=FALSE}
 
@@ -391,10 +410,10 @@ current <- read_csv('Data/tiltmeter-sn2102061-drto-suite.csv', col_types = cols(
            Temperature = `Temperature (C)`
            ) %>%
     #manual start/stop time of monitoring
-    #filter(DateTime >= as.POSIXct('2024-06-23 13:30:00', tz='UTC') &
-    #       DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
+    filter(DateTime >= as.POSIXct('2024-06-23 18:00:00', tz='UTC') &
+           DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
     mutate(DateTime = with_tz(DateTime, 'America/New_York'))
-head(current)
+#head(current)
 ```
 
 
@@ -414,9 +433,9 @@ head(current)
         select(-interval)%>%
 
   #manual start/stop time of monitoring
-    #filter(DateTime >= as.POSIXct('2024-06-23 13:30:00', tz='UTC') &
-    #       DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
-  mutate(DateTime = with_tz(DateTime, 'America/New_York'))
+    filter(DateTime >= as.POSIXct('2024-06-23 18:00:00', tz='UTC') &
+           DateTime <= as.POSIXct('2024-06-27 10:45:00', tz='UTC')) %>%
+    mutate(DateTime = with_tz(DateTime, 'America/New_York'))
 
 ```
 
@@ -426,33 +445,44 @@ head(current)
 #pH and temp combined 
 
 # Scale Temperature 
-pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.8371
+pH$Temp.adj <- (pH$Temperature * 0.1099) + 4.98
+SAS.data$Temp.adj <- (SAS.data$Temperature * 0.1099) + 4.98
 
 # Plot
 pH_Temp_Plot<-ggplot(data = pH) +
   # Day/Night
-  # annotate("rect",
-  #         xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
-  #                        by = "day", length.out = 3),
-  #         xmax = seq.POSIXt(as.POSIXct('2021-06-26 05:45:00', tz='EST'),
-  #                        by = "day", length.out = 3),
-  #         ymin = -Inf, ymax = Inf,
-  #         fill="grey", alpha=0.5) +
-  #  annotate("text",
-  #         label = paste("Jun", 25:28),
-  #         x = seq.POSIXt(as.POSIXct('2021-06-25 15:00:00', tz='EST'),
-  #                        by = "day", length.out = 4),
-  #         y = 7.985)+ 
-  # Data
+   annotate("rect",
+          xmin = seq.POSIXt(as.POSIXct('2024-06-23 20:23:00', tz='America/New_York'),
+                         by = "day", length.out = 4),
+          xmax = seq.POSIXt(as.POSIXct('2024-06-24 06:42:00', tz='America/New_York'),
+                         by = "day", length.out = 4),
+          ymin = -Inf, ymax = Inf,
+          fill="grey", alpha=0.5) +
+   annotate("text",
+          label = paste("Jun", 23:26),
+          x = seq.POSIXt(as.POSIXct('2024-06-23 14:00:00', tz='EST'),
+                         by = "day", length.out = 4),
+          y = 8.24)+
+  # Ecopart data
   geom_line(aes(x=DateTime, y=Temp.adj, color = "Temperature"),
             size=0.8) +
   geom_line(aes(x=DateTime, y=pH, color = "pH"),
             size=0.8) +
-  scale_color_manual(values=c("black", "red"))+
+  #scale_color_manual(values=c("black", "red"))+
+  
+  # SAS data
+  geom_point(data= SAS.data, aes(x=DateTime, y=pH_measured, color = "SAS meassured pH"),
+            size=1.5) +
+  geom_point(data= SAS.data, aes(x=DateTime, y=pH_calculated, color = "SAS calculated pH"),
+            size=1.5) +
+  geom_point(data= SAS.data, aes(x=DateTime, y=Temp.adj, color = "SAS temperature"),
+            size=1.5) +
+  scale_color_manual(values=c("black", "green4", "purple4", "red", "red4"))+
+  
   # Axes
-  scale_y_continuous(#limits = c(7.925, 7.985),
+  scale_y_continuous(limits = c(7.85, 8.25),
                      name="pH (Total scale)",
-                     sec.axis = sec_axis(~(.-4.8371)/0.1099,
+                     sec.axis = sec_axis(~(.-4.98)/0.1099,
                                 name="Temperature (\u00B0C)"))  +
   scale_x_datetime(name="Date and Time (EDT)",
                   date_breaks = "6 hour",
@@ -474,7 +504,7 @@ pH_Temp_Plot<-ggplot(data = pH) +
   guides(colour = guide_legend(override.aes = list(size = 8)))+
   theme(legend.key=element_rect(fill=NA))+ 
   theme(axis.title.y.right = element_text(vjust = .75))
-pH_Temp_Plot
+#pH_Temp_Plot
  
 ```
 
@@ -486,18 +516,17 @@ current$ws.adj<-(current$ws * scaleFactor)
 
 # Plot
 Light_Current<-ggplot(data = light) +
-
-  # Day/Night
-  annotate("rect",
-          xmin = seq.POSIXt(as.POSIXct('2021-06-25 19:24:00', tz='EST'),
-                         by = "day", length.out = 3),
-          xmax = seq.POSIXt(as.POSIXct('2021-06-26 05:45:00', tz='EST'),
-                         by = "day", length.out = 3),
+ # Day/Night
+ annotate("rect",
+          xmin = seq.POSIXt(as.POSIXct('2024-06-23 20:23:00', tz='America/New_York'),
+                         by = "day", length.out = 4),
+          xmax = seq.POSIXt(as.POSIXct('2024-06-24 06:42:00', tz='America/New_York'),
+                         by = "day", length.out = 4),
           ymin = -Inf, ymax = Inf,
           fill="grey", alpha=0.5) +
   
   # Data
-  geom_line(data= current, aes(x=date, y=ws.adj, color = "Current Speed"),
+  geom_line(data= current, aes(x=DateTime, y=ws.adj, color = "Current Speed"),
             size=0.8) +
   geom_line(aes(x=DateTime, y=PAR, color = "PAR"),
             size=0.8) +
@@ -508,7 +537,7 @@ Light_Current<-ggplot(data = light) +
                      name=expression(paste("PAR (",mu,"mol photons m"^-2,"s"^-1,")")),
                      sec.axis = sec_axis(~./scaleFactor, 
                                 name="Current Speed (cm/s)",
-                                breaks = seq(1,12,2)))+
+                                breaks = seq(0,14,2)))+
                        
   scale_x_datetime(name="Date and Time (EDT)",
                    date_breaks = "6 hour",
@@ -516,7 +545,7 @@ Light_Current<-ggplot(data = light) +
                    labels = date_format("%m/%d\n%H:%M",
                                         tz="America/New_York")) +
 
-  coord_cartesian(ylim = c(0,455),
+  coord_cartesian(ylim = c(0,420),
                   xlim = c(min(light$DateTime),max(light$DateTime)),
                   clip = 'off',
                   expand = T) +
@@ -530,6 +559,7 @@ Light_Current<-ggplot(data = light) +
         )+
   guides(colour = guide_legend(override.aes = list(size = 8)))+
   theme(legend.key=element_rect(fill=NA))
+#Light_Current
 
 ```
 
@@ -545,15 +575,22 @@ Legend2<-Light_Current + theme(legend.position = "bottom",
   Legend2<-get_legend(Legend2)
   #ggdraw(Legend2)
   
+# ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
+#                            Light_Current,
+#                            ncol=1, align='v', 
+#                            rel_heights = c(0.9, 1)),
+#                  plot_grid(Legend1, Legend2, ncol=2), 
+#                  ncol = 1, rel_heights=c(1, 0.1)))
+
 ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
                            Light_Current,
                            ncol=1, align='v', 
                            rel_heights = c(0.9, 1)),
-                 plot_grid(Legend1, Legend2, ncol=2), 
-                 ncol = 1, rel_heights=c(1, 0.1)))
+                 plot_grid(Legend1, Legend2, ncol=1), 
+                 ncol = 1, rel_heights=c(1.1, 0.15)))
 ```
 
-<font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 25th to 28th. Top panel: pH and temperature from SeaFET. Bottom panel: Photosynthetically Available Radiation (PAR) and current speed from EcoPAR and Tiltmeter. Grey blocks denote night time throughout sequence of the plot. Instruments measured parameters every 5 minutes. </font>
+<font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 23th to 27th. Top panel: pH and temperature from SeaFET. Bottom panel: Photosynthetically Available Radiation (PAR) and current speed from EcoPAR and Tiltmeter. Grey blocks denote night time throughout sequence of the plot. Instruments measured parameters every 5 minutes. </font>
 
 
 As part of the diurnal suite, discrete water samples were collected at three-hour intervals (n=24) using Subsurface Automatic Samplers (SAS). These samples will be analyzed for Total Alkalinity (TA), Dissolved Inorganic Carbon (DIC), and Spectrophotometric pH (SpecpH). Using these metrics we can get the calculated values for pCO2 and aragonite saturation state. For more information on SAS vist https://www.coral.noaa.gov/accrete/sas/
@@ -581,7 +618,7 @@ knitr::include_graphics("Data/CAUBMU.jpg")
 
 ```{r mosaic, echo=FALSE, out.width = '50%', fig.cap="Scientist Nathan Formel collects images to create the orthorectified landscape mosaics", fig.align='center'}
 
-knitr::include_graphics("Data/natemosaic.jpg")
+#knitr::include_graphics("Data/natemosaic.jpg")
 
 ```
 
@@ -645,7 +682,7 @@ funding
 ### Our Team
 
 ```{r team, echo=FALSE, out.width = '50%', fig.align='center'}
-knitr::include_graphics("Data/Fieldteam.jpg")
+#knitr::include_graphics("Data/Fieldteam.jpg")
 ```
 
 **Field team members**: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel
