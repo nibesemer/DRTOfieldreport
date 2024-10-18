@@ -61,14 +61,14 @@ knitr::include_graphics("Data/STRfish.jpg")
 <br>
 
 <h4 style="font size=8">
-Atlantic Oceanographic &amp; Meteorological Laboratory Coral Program<br>
-University of Miami Cooperative Institute of Marine and Atmospheric Science<br>
-National Oceanic Atmospheric Administration</h4>
+NOAA/Atlantic Oceanographic &amp; Meteorological Laboratory (AOML) Coral Program<br>
+University of Miami Cooperative Institute of Marine and Atmospheric Science (CIMAS)<br>
+
 
 <br>
 
 <h5 style="font size=6">
-N. Besemer, A. Palacio, M. Jankulak, I. Enochs - October 2024
+N. Besemer, A. Palacio, M. Jankulak, A. Webb, I. Enochs - October 2024
 </h5>
 
 ```{r logos, echo=FALSE, fig.align='left', out.width='20%'}
@@ -81,41 +81,44 @@ plot_grid(p1, p2)
  
 --------
 
-### About this summary brief
+### Mission
 
-The NOAA Atlantic Oceanographic and Meteorological Laboratory (AOML) conducts the long-term National Coral Reef Monitoring Program (NCRMP) to track the status and trends of coral reef ecosystems of the U.S. Atlantic and Caribbean coral reef jurisdictions. This FY21 summary brief provides an overview of the most recent survey efforts.
+The	AOML	Coral	Program	tracks	the	status	and	trends	of coral	reef	ecosystems	in	the	U.S.	Atlantic	and	Caribbean	 as	part	of	the	National	Coral	Reef	Monitoring	Program	(NCRMP).	This	summary	brief	provides	an	overview	of the	most	recent	climate	monitoring	efforts	in Dry Tortugas National Park
 
 
 ### Expedition summary
 
-* The most recent NCRMP Atlantic climate monitoring took place at Dry Tortugas National Park from June 24th to June 29th 2021
+* The NCRMP Atlantic climate monitoring team surveryed in Dry Tortugas National Park from June 23rd to June 27th, 2024
 
-* Four different sites were visited by 5 team members completing a total of 63 dives. 
-* These sites represent temporal‐resolution monitoring with moored instruments at fixed time‐series which are placed on depth gradient to assess how vertical structure affects reef status and trends.
+* A total of Four different sites were visited by 6 team members completing a total of 76 dives. 
 
 
 --------
 
-### Data collection
+### Data collection summary
 
-* Subsurface **temperature** recorders (STRs) were recovered and redeployed at all 4 study sites (Fig. 1), accounting for 1.1 million temperature observations:
+**Subsurface temperature:** Subsurface temperature	recorders	(STRs)	were	recovered	and	redeployed	at	four sites,	each representing four different depths	(Fig.	1).	In	total,	more	than	10	million	temperature	observations	were	collected	from 4 instruments	(Table	1).
+
+TABLE OF THIS?
   - Pulaski Shoal (1m): 311,609 observations 
   - White Shoal (5m): 311,213 observations 
   - Bird Key Reef (15m): 311,560 observations 
   - Black Coral Rock (25m): 165,695 observations 
 
 
-* At the Bird Key Reef, short term instruments (72h) were deployed to  monitor daily fluctuations in: 
-  - **Current**: 880 observations
+**NCRMP	Climate	fixed	sentinel	site	monitoring:** At Bird Key reef	-	15m	site,	located	in	SE	DRTO,	short	term instruments	(54h)	were	deployed	to	monitor	daily	fluctuations	in:
+CHECK NUMBERS 
+- **Current**: 880 observations
   - **pH**: 879 observations
   - **Light**: 876 observations
   - **Carbonate Chemistry**: 24 samples collected
   
-* Additionally, changes in benthic cover and carbonate production were monitored at Bird Key Reef by recording:
-  - **Bioerosion**: 5 Bioerosion Monitoring Units (BMUs) collected, 10 redeployed 
+**Habitat persistence:** Changes in bioerosion and accretion were monitored:
+  - **Carbonate budget surveys**: Benthic cover, sponge, urchin and parrotfish surveys completed at 6 transects
+  - **Bioerosion**: 10 Bioerosion Monitoring Units (BMUs) collected, 10 redeployed 
   - **Calcification**: 5 Calcification Accretions Units (CAUs) collected, 5 redeployed
   - **Benthic cover**: 6 landscape mosaics
-  - **Carbonate budget surveys**: Benthic cover, sponge, urchin and parrotfish surveys completed at 6 transects
+
 
 <br>
 
@@ -207,9 +210,9 @@ map
 
 -----
 
-#### Temperature
+#### Subsurface temperature
 
-Three years of temperature measurements were retrieved and processed from all 4 sites (depths). Temperature was measured using SeaBird Electronics Subsurface Temperature Recorders (STR)s that collected data at 5-minute intervals.
+The	temperatures	that	marine	organisms	experience	are	a function	of	local	oceanographic	conditions	and	vary	with	depth. To	monitor	subsurface temperature, four sites were established arounf the national park representing four depths (1,	5,	15,	25m;	Fig.2). Temperature was measured	using	SeaBird	Electronics	Subsurface	Temperature Recorders	(STR)s	that	collected	data	at	5-minute	intervals.	These instreuments are recovered and replaced every 3 years since 2015. Gaps exsist in the data as not all instruments survived the deployment time period, likely due to battery issues. DO WE WANT TO INCLUDE OLDER DATA OR ELABORATE ON CUT OFF?
 
 ```{r get Temp, include=FALSE}
 
@@ -332,7 +335,7 @@ Figure2 <- ggarrange(plot, box, widths = c(8/10, 2/10))
 Figure2
 ```
 
-<font size="2"> **Figure 2:** Temperature conditions at four sites in the Dry Tortugas representing a depth gradient: Pulaski Shoal Lighthouse (1m) White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m). Data were collected from June 2021 to XX, with the exception of the 25m STR that recorded until February 7th 2020. </font>
+<font size="2"> **Figure 2:** Temperature conditions at four sites in the Dry Tortugas representing a depth gradient: Pulaski Shoal Lighthouse (1m) White Shoal (5m), Bird Key Reef (15m), and Black Coral Rock (25m). Data were collected from June 2021 to 2024, but instruments failed at XX, XX XXX. </font>
  
 ```{r, echo = F, include=T}
 STR_all$MonthYear<-format(STR_all$UTCDateTime, format="%Y-%m")
@@ -359,14 +362,14 @@ str_summary_m <- STR_all %>%
 str_summary_m
 
 ```
-
+UPDATE THIS SUMMARY STATS FOR TEMP
 Temperature values were similar among the 1m, 5m and 15m depths with the lowest temperatures recorded during February 2021 (20.8, 20.7, and 19.9 $^\circ$C, respectively) and the the higest temperatures during the summer of 2019 and 2020 (31.7, 31.6, and 31.5 $^\circ$C, respectively). Though the 25m STR stopped recording on February 7, 2020, it detected consistent temperature stratification at this site during the summers when it was active. Temperatures at 25m were on average 5-6$^\circ$C lower during summer 2018, and 1$^\circ$C lower during summer 2019, compared with the values at other depths (Fig. 2). 
 
 -----
 
 #### Diurnal Suite Deployment
 
-At Bird Key Reef additional instruments were deployed for a 72-hour diurnal suite that monitored pH, temperature, light and current speed (Fig. 3). The SeaFET pH logger, EcoPAR and Tiltmeter collected measurements at 5-minute intervals.
+Seawater	carbonate	chemistry	can	fluctuate	diurnally,	due	to biological	forcing	processes	such	as	photosynthesis	and	respiration,	as	well	as	calcification	and	dissolution.	To characterize	this,	discrete	water	samples	(Fig.	3)	were collected	at	three-hour	intervals	(n=15)	using	Subsurface Automatic	Samplers	(SAS,	www.coral.noaa.gov/accrete/sas). These	samples	will	be	analyzed	for	Total	Alkalinity	(TA),	Dissolved	Inorganic	Carbon	(DIC),	and	Spectrophotometric pH	(Spec pH),	which	will	be	used	to	calculate	pCO2 and	aragonite	saturation	state	(ΩAragonite).	A	suite	of	instruments	was deployed	for	a	72-hour	period	at Bird Key	15m	site.	A	SAMI pH was	used	to	log	pH,	an	EcoPAR	measured Photosynthetically	Active	Radiation	(PAR),	and	a	Lowell Tiltmeter	measured	current	speed	and	direction.	Each collected	measurements	at	15-minute	intervals	(Fig.	3).
 
 ```{r pH_and_temp_data, include=FALSE}
 
@@ -594,7 +597,8 @@ ggdraw(plot_grid(plot_grid(pH_Temp_Plot,
                  ncol = 1, rel_heights=c(1.1, 0.15)))
 ```
 
-<font size="2">**Figure 3:** Bird Key Reef (15m) diurnal suite monitoring from June 23th to 27th. Top panel: pH and temperature from SeaFET. Bottom panel: Photosynthetically Available Radiation (PAR) and current speed from EcoPAR and Tiltmeter. Grey blocks denote night time throughout sequence of the plot. Instruments measured parameters every 5 minutes. </font>
+<font size="2">**Figure 3:** Data from Bird Key Reef (15m) diurnal suite monitoring from June 23th to 27th, 2024. Top	panel:	pH	and	temperature	from SAMI pH.	Bottom	panel:	Photosynthetically	Available	Radiation	(PAR)	and	current	speed	from	EcoPAR	and	Tiltmeter.	Shading	
+denotes	nighttime	throughout	sequence	of	the	plot.	Instruments	measured	parameters	every	15	minutes.	 </font>
 
 
 As part of the diurnal suite, discrete water samples were collected at three-hour intervals (n=24) using Subsurface Automatic Samplers (SAS). These samples will be analyzed for Total Alkalinity (TA), Dissolved Inorganic Carbon (DIC), and Spectrophotometric pH (SpecpH). Using these metrics we can get the calculated values for pCO2 and aragonite saturation state. For more information on SAS vist https://www.coral.noaa.gov/accrete/sas/
@@ -609,7 +613,7 @@ knitr::include_graphics("Data/SAS.jpg")
 
 #### Habitat persistence
 
-**Carbonate budget** assessments use transect-based surveys to quantify the abundance of carbonate producers, such as corals and crustose coralline algae, as well as carbonate bioeroders, such as grazing parrotfish and sea urchins. Abundances are multiplied by taxon- specific rates of carboante alteration to determine if a reef is in a state of net accretion (habitat growth) or net loss (habitat loss). At East Buoy 3, six transects were established and surveyed in 2015 to obtain carbonate budgets. We revisited this site in 2019 and 2022 to find out the new status of carbonate budget after six years. The transect results showed that carbonate budgets have decreased in 2022. This trend is driven by a reduction in coral cover and calcification as well as a steep increase in parrotfish erosion. MORE SUMMAITON TEXT FOR FGB CARB BUDGETS
+**Carbonate budget** assessments use transect-based surveys (ReefBudget) to quantify the abundance of carbonate producers( e.g., corals and crustose coralline algae), and carbonate bioeroders	(e.g.,	parrotfish	and	sea	urchins). Abundances are multiplied by taxon- specific rates of carboante alteration to determine if a reef is in a state of net accretion (habitat growth) or net loss (habitat loss; Fig.4). At Bird Key Reef, six transects were established and surveyed in 2015, 2018, 2021 and 2024 to obtain carbonate budgets.  The transect results showed that carbonate budgets have decreased in 2024. This trend is driven by a reduction in coral cover and calcification as well as a steep increase in parrotfish erosion. MORE SUMMAITON TEXT FOR DRTO CARB BUDGETS
 
 ```{r, Carbonate_B_plot, echo=FALSE, warning=FALSE, fig.width = 7.5, fig.height = 3.5}
 ## boxplots production
@@ -655,7 +659,8 @@ ggarrange(CB_A_plot, CB_B_plot,
           ncol = 2, nrow = 1, widths = c(0.8, 2.2))
 ```
 
-<font size="2">**Figure 4:** Carbonate budgets from East FGB in 2015, 2019 and 2022 and the processes contributing to calcification and bioerosion.  The horizontal line in the "Net carbonate production panel" denotes accretionary stasis, the point where the budget flips from habitat grpwth to loss. PF represents parrotfish. </font>
+<font size="2">**Figure 4:** Net carbonate production and the magnitude of carbonate alteration by calcifying or bioeroding functional	groups.	CCA represents crustose coralline algae. PF	represents	parrotfish. The	scale	of the	y-axis varies for
+each	functional	group. </font>
 
 
 
@@ -668,7 +673,9 @@ ggarrange(CB_A_plot, CB_B_plot,
 
 ```
 
-Finally, **Calcification Accretion Units (CAUs)** and **Bioerosion Monitoring Units (BMUs)** were used to investigate the balance between calcification and erosion. CAUs and BMUs were collected and redeployed for the next sampling cycle. CAUs are processed by the Pacific Climate group and the data will be available within a year. BMUs will be dried and cleaned using a hydrogen peroxide solution. These samples will be weighed and scanned using a CT scanner and then compared to their pre-scans to quantify bioerosion. Data will be available in a year. Please reference previous datasets for more information.
+**Calcification Accretion Units (CAUs)** and **Bioerosion Monitoring Units (BMUs)** were	used	to investigate the balance between calcification and
+erosion. CAUs and BMUs were collected and redeployed for the next sampling cycle. CAUs are processed by the NCRMP Pacific Climate group and the data will	be available within a year. BMUs will	be dried and cleaned using a hydrogen peroxide solution. Samples will	be weighed and scanned using a	CT	scanner and	then	compared to	their	pre-scans	to	quantify bioerosion.
+
 
 
 ```{r BMUs, echo=FALSE, out.width = '50%', fig.cap="CAU and BMU pair before retreval after being deployed for three years. CAUs are two parallel PVC plates to quantify settled accretors. BMU is mounted coral skeleton installed at the base of the metal stake and has been encrusted.", fig.align='center'}
@@ -682,11 +689,11 @@ knitr::include_graphics("Data/CAUBMU.jpg")
 ### About the monitoring program
 
 AOML's climate monitoring is a key part of the National Coral Reef Monitoring Program of NOAA's Coral Reef Conservation Program (CRCP), providing integrated, consistent, and comparable data across U.S. Managed coral reef ecosystems.
-CRCP monitoring efforts aim to:
+NCRMP monitoring efforts aim to:
 
 * Document the status of reef species of ecological and economic importance.
 * Track and assess changes in reef communities in response to environmental stressors or human activities.
-* Evaluate the effectiveness of specific management strategies and identify actions for future and adaptive responses.
+* Deliver	high–quality	data,	data	products,	and	tools to	the	coral	reef	conservation	community
 
 
 ### Point of Contact
@@ -714,7 +721,7 @@ http://www.aoml.noaa.gov/
 ### Acknowledgements
 
 
-These efforts were jointly funded by NOAA's CRCP and OAP. We would like to thank the National Park Service and Florida Keys National Marine Sanctuary for permitting support and the ANGARI Foundation for field support.
+These efforts were jointly funded by NOAA's CRCP project #743 and OAP. We would like to thank the National Park Service and Florida Keys National Marine Sanctuary for permitting support and the ANGARI Foundation for field support.
 
 
 ```{r fundingsources, include=FALSE, fig.align='left', out.width='35%'}
@@ -739,6 +746,6 @@ funding
 #knitr::include_graphics("Data/Fieldteam.jpg")
 ```
 
-**Field team members**: Anderson Mayfield, Graham Kolodziej, Nicole Besemer, Nathan Formel, Patrick Kiel
+**Field team members**: Ana Palacio, Ian Enochs, Nicole Besemer, Rich Karp, Taylor Gill, Ashley Stevens
 
-**Additional lab members involved with NCRMP**: Ian Enochs, Benjamin Chomitz, Albert Boyd, Mike Jankulak, Ana Palacio
+**Additional lab members involved with NCRMP**: Benjamin Chomitz, Albert Boyd, Mike Jankulak, Alice Webb
