@@ -68,7 +68,7 @@ National Oceanic Atmospheric Administration</h4>
 <br>
 
 <h5 style="font size=6">
-N. Besemer, A. Palacio, M. Jankulak, I. Enochs - October 2024
+N. Besemer, A. Palacio, M. Jankulak, Webb, A., I. Enochs - October 2024
 </h5>
 
 ```{r logos, echo=FALSE, fig.align='left', out.width='20%'}
